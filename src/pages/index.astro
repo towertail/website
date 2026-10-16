@@ -1,7 +1,285 @@
 ---
 import Base from "../layouts/Base.astro";
+import Popover from "../components/Popover.astro";
+import InstallCommand from "../components/InstallCommand.astro";
+import CloudWaitlist from "../components/CloudWaitlist.astro";
+import { buildReleases } from "../lib/releases";
+import { BREW_CMD, DOWNLOAD_URL, GITHUB_URL, MIN_MACOS, WINDOWS_BUILD_URL } from "../config/site";
+
+const latest = (await buildReleases()).find((r) => r.channel === "app");
+
+const features = [
+  {
+    label: "No agent",
+    title: "SSH only",
+    body: "Towertail copies a small sampler to ~/.towertail/ and runs it as your user. No root, no open port.",
+  },
+  {
+    label: "Tailscale",
+    title: "Finds your hosts",
+    body: "Towertail reads your tailnet and shows each machine. Select the hosts that you want to add.",
+  },
+  {
+    label: "Thresholds",
+    title: "Warn and critical",
+    body: "Set limits for each metric. A card turns amber or red, and macOS shows a notification.",
+  },
+  {
+    label: "History",
+    title: "Go back to a spike",
+    body: "Charts and the process list for the last 2 hours. Move back in time and see the cause of a spike.",
+  },
+  {
+    label: "Native",
+    title: "Light on your Mac",
+    body: "A SwiftUI app in the menu bar only. A Windows tray app is in progress.",
+  },
+  {
+    label: "Open source",
+    title: "Read every line",
+    body: "The app and the server are AGPL-3.0. The sampler is Apache-2.0. The code is on GitHub.",
+  },
+];
+
+const steps = [
+  { title: "Install", body: "Use Homebrew, or download the zip.", code: BREW_CMD },
+  {
+    title: "Add a host",
+    body: "Select it from your tailnet, or type user@host. The app uses your SSH key.",
+    code: "ubuntu@web-edge-1.tailnet.ts.net",
+  },
+  {
+    title: "Set thresholds",
+    body: "The defaults: CPU and memory warn at 75% and go critical at 90%. Change them for each host.",
+    code: "disk  warn 85  crit 95",
+  },
+];
 ---
 
 <Base>
-  <div class="wrap"><h1 class="page-title">Towertail</h1></div>
+  <div class="wrap hero">
+    <div>
+      <span class="status-line">
+        <span class="dot pulse"></span>
+        {latest ? `v${latest.version} · ` : ""}{MIN_MACOS}+ · free and open source
+      </span>
+      <h1>Your whole fleet, one click from the menu bar.</h1>
+      <p class="lede">
+        Towertail shows CPU, memory, disk and network for each server that you own. It connects over SSH, finds hosts
+        on your tailnet, and installs no agent. Setup takes approximately two minutes.
+      </p>
+      <div class="install">
+        <InstallCommand command={BREW_CMD} />
+        <div class="ctas">
+          <a class="btn primary" href={DOWNLOAD_URL} data-download>Download for Mac</a>
+          <a class="btn ghost" href="/docs/">Read the docs</a>
+        </div>
+        <span class="fine">
+          Signed and notarized · updates from GitHub Releases · Windows: <a href={WINDOWS_BUILD_URL}>build from source</a>
+        </span>
+      </div>
+    </div>
+    <Popover />
+  </div>
+
+  <section class="block">
+    <div class="wrap">
+      <span class="label">Why Towertail</span>
+      <h2>Made for small fleets and the people who run them.</h2>
+      <p class="sub">
+        Homelab boxes, the ten VMs of a startup, or client servers. You see all of them at a glance, without a web
+        dashboard.
+      </p>
+      <div class="features">
+        {
+          features.map((f) => (
+            <div class="feat">
+              <span class="label">{f.label}</span>
+              <h3>{f.title}</h3>
+              <p>{f.body}</p>
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="block">
+    <div class="wrap">
+      <span class="label">Get started</span>
+      <h2>Three steps to your first card.</h2>
+      <p class="sub">Install the app, add a host, and set your limits.</p>
+      <ol class="how">
+        {
+          steps.map((s, i) => (
+            <li class="step">
+              <span class="n">{i + 1}</span>
+              <h3>{s.title}</h3>
+              <p>{s.body}</p>
+              <pre>{s.code}</pre>
+            </li>
+          ))
+        }
+      </ol>
+      <p class="more"><a href="/docs/install/">Read the install guide →</a></p>
+    </div>
+  </section>
+
+  <section class="block" id="cloud">
+    <div class="wrap"><CloudWaitlist /></div>
+  </section>
+
+  <section class="block">
+    <div class="wrap oss">
+      <div>
+        <span class="label">Self-host</span>
+        <h2>Run the server on your own machine.</h2>
+        <p class="sub">The Towertail server is a Go service in a Docker container. It is AGPL-3.0, like the app.</p>
+      </div>
+      <div class="ctas">
+        <a class="btn ghost" href="/docs/self-host/quick-start/">Self-host guide</a>
+        <a class="btn ghost" href={GITHUB_URL}>Source on GitHub</a>
+      </div>
+    </div>
+  </section>
 </Base>
+
+<style>
+  .hero {
+    padding-block: 64px 48px;
+    display: grid;
+    grid-template-columns: minmax(0, 1.1fr) minmax(0, 0.9fr);
+    gap: 48px;
+    align-items: center;
+  }
+  h1 {
+    font-size: clamp(34px, 5vw, 54px);
+    line-height: 1.05;
+    letter-spacing: -0.025em;
+    margin: 14px 0 18px;
+    text-wrap: balance;
+    font-weight: 700;
+  }
+  .lede {
+    color: var(--tt-muted);
+    font-size: 18px;
+    max-width: 34em;
+    margin: 0 0 28px;
+  }
+  .status-line {
+    display: inline-flex;
+    gap: 10px;
+    align-items: center;
+    font: 13px var(--tt-font-mono);
+    color: var(--tt-muted);
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--tt-ok);
+  }
+  .install {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    max-width: 520px;
+  }
+  .ctas {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: center;
+  }
+  .fine a {
+    color: var(--tt-muted);
+  }
+  .features {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 28px 32px;
+  }
+  .feat {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  .feat h3,
+  .step h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+  .feat p,
+  .step p {
+    margin: 0;
+    color: var(--tt-muted);
+    font-size: 15px;
+  }
+  .feat .label {
+    margin-bottom: 4px;
+  }
+  .how {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+    list-style: none;
+    margin: 0;
+    padding: 0;
+  }
+  .step {
+    border-top: 2px solid var(--tt-line);
+    padding-top: 14px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    min-width: 0;
+  }
+  .step .n {
+    font: 500 12px var(--tt-font-mono);
+    color: var(--tt-ok);
+  }
+  .step pre {
+    margin: 6px 0 0;
+    font: 12px/1.6 var(--tt-font-mono);
+    color: var(--tt-muted);
+    background: var(--tt-panel);
+    border: 1px solid var(--tt-line);
+    border-radius: 8px;
+    padding: 10px 12px;
+    overflow-x: auto;
+  }
+  .more {
+    margin: 24px 0 0;
+  }
+  .more a {
+    color: var(--tt-ok);
+    text-decoration: none;
+  }
+  .oss {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 40px;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .oss .sub {
+    margin-bottom: 0;
+  }
+  @media (max-width: 820px) {
+    .hero,
+    .features,
+    .how {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+  @media (prefers-reduced-motion: no-preference) {
+    .pulse {
+      animation: pulse 2.4s ease-in-out infinite;
+    }
+    @keyframes pulse {
+      50% {
+        opacity: 0.35;
+      }
+    }
+  }
+</style>

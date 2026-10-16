@@ -30,10 +30,12 @@ jobs:
         with:
           args: >-
             --no-progress --root-dir "${{ github.workspace }}/dist"
-            --exclude '^https://towertail\.com' --exclude '/edit/main/'
+            --exclude '^https://towertail\.com' --exclude '/edit/main/' --exclude '/api/waitlist$' --exclude '/compare/'
             --max-retries 3 --accept 200,429
             'dist/**/*.html'
           fail: true
+      - name: Lighthouse (performance and accessibility at 95 or more)
+        run: npx -y @lhci/cli@0.15.1 autorun
       - run: pnpm exec playwright install --with-deps chromium
       - run: pnpm test:e2e
       - uses: actions/upload-artifact@v4

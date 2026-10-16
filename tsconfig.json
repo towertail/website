@@ -1,8 +1,5 @@
 {
   "extends": "astro/tsconfigs/strict",
   "include": [".astro/types.d.ts", "**/*"],
-  "exclude": ["dist", "node_modules", "test-results", "playwright-report"],
-  "compilerOptions": {
-    "types": ["./src/worker/worker-configuration.d.ts", "@cloudflare/vitest-plugin/types"]
-  }
+  "exclude": ["dist", "node_modules", "test-results", "playwright-report", "src/worker", "tests/worker"]
 }

@@ -1,0 +1,145 @@
+---
+import Sparkline, { type Tint } from "./Sparkline.astro";
+
+export interface Metric {
+  key: "CPU" | "MEM" | "DISK" | "NET";
+  value: string;
+  tint?: Tint;
+  kind?: "line" | "area" | "bars";
+  values: number[];
+}
+
+export interface Host {
+  name: string;
+  platform: string;
+  age: string;
+  status: Tint | "off";
+  metrics?: Metric[];
+  error?: string;
+}
+
+interface Props {
+  host: Host;
+}
+const { host } = Astro.props;
+const statusLabel = { ok: "nominal", warn: "warning", crit: "critical", off: "offline" }[host.status];
+---
+
+<div class:list={["card", host.status]}>
+  <div class="card-h">
+    <span class:list={["dot", host.status]} role="img" aria-label={statusLabel}></span>
+    <b>{host.name}</b>
+    <span class="meta">{host.platform ? `${host.platform} · ${host.age}` : host.age}</span>
+  </div>
+  {
+    host.metrics ? (
+      <div class="cells">
+        {host.metrics.map((m) => (
+          <div class="cell">
+            <span class="k">{m.key}</span>
+            <span class:list={["v", m.tint !== "ok" && m.tint, { net: m.key === "NET" }]}>{m.value}</span>
+            <Sparkline values={m.values} kind={m.kind} tint={m.key === "NET" ? "ok" : m.tint} />
+          </div>
+        ))}
+      </div>
+    ) : (
+      <span class="fine">{host.error}</span>
+    )
+  }
+</div>
+
+<style>
+  .card {
+    border: 1px solid var(--tt-line);
+    border-radius: 10px;
+    padding: 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: color-mix(in srgb, var(--tt-cell) 50%, var(--tt-panel));
+  }
+  .card.warn {
+    border-color: var(--tt-warn);
+  }
+  .card.crit {
+    border-color: var(--tt-crit);
+  }
+  .card.off {
+    background: transparent;
+  }
+  .off .card-h b {
+    color: var(--tt-muted);
+  }
+  .card-h {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    min-width: 0;
+  }
+  .card-h b {
+    font-size: 15px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+  .meta {
+    margin-left: auto;
+    font: 11px var(--tt-font-mono);
+    color: var(--tt-faint);
+    white-space: nowrap;
+  }
+  .off .meta {
+    color: var(--tt-crit);
+  }
+  .dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--tt-ok);
+    flex-shrink: 0;
+  }
+  .dot.warn {
+    background: var(--tt-warn);
+  }
+  .dot.crit {
+    background: var(--tt-crit);
+  }
+  .dot.off {
+    background: var(--tt-faint);
+  }
+  .cells {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 6px;
+  }
+  .cell {
+    background: var(--tt-cell);
+    border-radius: 7px;
+    padding: 7px 8px;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    min-width: 0;
+  }
+  .k {
+    font: 500 9px var(--tt-font-mono);
+    letter-spacing: 0.12em;
+    color: var(--tt-faint);
+  }
+  .v {
+    font: 600 16px var(--tt-font-body);
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+  }
+  .v.warn {
+    color: var(--tt-warn);
+  }
+  .v.crit {
+    color: var(--tt-crit);
+  }
+  .v.net {
+    font: 500 12px var(--tt-font-mono);
+    color: var(--tt-net);
+    line-height: 20px;
+  }
+</style>

@@ -18,6 +18,9 @@
   --sl-color-accent-high: #a8f0bb;
   --sl-color-bg-nav: var(--tt-bg);
   --sl-color-bg-sidebar: var(--tt-bg);
+  --sl-color-blue-low: #0d2338;
+  --sl-color-blue: var(--tt-net);
+  --sl-color-blue-high: #a9cdfb;
 }
 
 :root[data-theme="light"] {
@@ -35,4 +38,7 @@
   --sl-color-accent-high: #0e4d20;
   --sl-color-bg-nav: #ffffff;
   --sl-color-bg-sidebar: #ffffff;
+  --sl-color-blue-low: #e6f0fd;
+  --sl-color-blue: var(--tt-net);
+  --sl-color-blue-high: #0a4fa0;
 }

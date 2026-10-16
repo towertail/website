@@ -1,0 +1,45 @@
+---
+// Values are 0-100. The SVG is 60x18.
+export type Tint = "ok" | "warn" | "crit";
+
+interface Props {
+  values: number[];
+  kind?: "line" | "area" | "bars";
+  tint?: Tint;
+}
+const { values, kind = "line", tint = "ok" } = Astro.props;
+const W = 60;
+const H = 18;
+const color = `var(--tt-${tint})`;
+const y = (v: number) => +(H - (v / 100) * H).toFixed(1);
+const step = W / (values.length - 1);
+const line = values.map((v, i) => `${i ? "L" : "M"}${+(i * step).toFixed(1)} ${y(v)}`).join(" ");
+const barW = W / values.length - 2;
+---
+
+<svg viewBox={`0 0 ${W} ${H}`} preserveAspectRatio="none" aria-hidden="true">
+  {
+    kind === "bars" ? (
+      <g fill={color}>
+        {values.map((v, i) => (
+          <rect x={+(i * (barW + 2)).toFixed(1)} y={y(v)} width={+barW.toFixed(1)} height={+(H - y(v)).toFixed(1)} />
+        ))}
+      </g>
+    ) : (
+      <>
+        {kind === "area" && (
+          <path d={`${line} L${W} ${H} L0 ${H}Z`} fill={`color-mix(in srgb, ${color} 20%, transparent)`} />
+        )}
+        <path d={line} fill="none" stroke={color} stroke-width="1.5" vector-effect="non-scaling-stroke" />
+      </>
+    )
+  }
+</svg>
+
+<style>
+  svg {
+    width: 100%;
+    height: 18px;
+    display: block;
+  }
+</style>

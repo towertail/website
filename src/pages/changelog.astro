@@ -1,0 +1,159 @@
+---
+import { Marked } from "marked";
+import Base from "../layouts/Base.astro";
+import { buildReleases, type Release } from "../lib/releases";
+import { RELEASES_URL } from "../config/site";
+
+const releases = await buildReleases();
+const app = releases.filter((r) => r.channel === "app");
+const server = releases.filter((r) => r.channel === "server");
+
+// Release notes sit under an h3, so their top heading level becomes h4.
+const notes = (body: string) => {
+  const top = Math.min(6, ...[...body.matchAll(/^(#{1,6})\s/gm)].map((m) => m[1].length));
+  const md = new Marked({
+    renderer: {
+      heading({ tokens, depth }) {
+        const level = Math.min(depth - top + 4, 6);
+        return `<h${level}>${this.parser.parseInline(tokens)}</h${level}>`;
+      },
+    },
+  });
+  return md.parse(body) as string;
+};
+
+const date = (iso: string) =>
+  new Date(iso).toLocaleDateString("en-US", { year: "numeric", month: "short", day: "numeric", timeZone: "UTC" });
+
+const lists: { id: string; title: string; items: Release[]; empty: string }[] = [
+  { id: "app", title: "App", items: app, empty: "No app release yet." },
+  { id: "server", title: "Server", items: server, empty: "No server release yet." },
+];
+---
+
+<Base title="Changelog" description="The release notes for the Towertail app and the Towertail server, from GitHub Releases.">
+  <div class="wrap page">
+    <span class="label">Changelog</span>
+    <h1 class="page-title">What changed in each release</h1>
+    <p class="sub">
+      The notes come from <a href={RELEASES_URL}>GitHub Releases</a>. The app tags are <code>vX.Y.Z</code>. The
+      server tags are <code>server/vX.Y.Z</code>.
+    </p>
+    <nav class="jump" aria-label="Release lists">
+      {lists.map((l) => <a href={`#${l.id}`}>{l.title} ({l.items.length})</a>)}
+    </nav>
+    {
+      lists.map((l) => (
+        <section class="list" id={l.id} aria-labelledby={`${l.id}-h`}>
+          <h2 id={`${l.id}-h`}>{l.title}</h2>
+          {l.items.length === 0 && <p class="sub">{l.empty}</p>}
+          {l.items.map((r) => (
+            <article class="rel">
+              <div class="rel-meta">
+                <h3 class="tag">
+                  <a href={r.url}>{r.tag}</a>
+                </h3>
+                <time class="date" datetime={r.publishedAt}>
+                  {date(r.publishedAt)}
+                </time>
+              </div>
+              <div class="notes" set:html={r.body ? notes(r.body) :"<p>No notes.</p>"} />
+            </article>
+          ))}
+        </section>
+      ))
+    }
+  </div>
+</Base>
+
+<style>
+  .page {
+    padding-block: 56px 32px;
+  }
+  .sub a {
+    color: var(--tt-fg);
+  }
+  .jump {
+    display: flex;
+    gap: 20px;
+    font: 14px var(--tt-font-mono);
+    margin-bottom: 16px;
+  }
+  .jump a {
+    color: var(--tt-muted);
+  }
+  .list {
+    padding-top: 32px;
+  }
+  .list h2 {
+    font-size: 22px;
+    margin: 0 0 8px;
+  }
+  .rel {
+    display: grid;
+    grid-template-columns: 160px minmax(0, 1fr);
+    gap: 16px;
+    padding-block: 18px;
+    border-bottom: 1px solid var(--tt-line);
+  }
+  .rel-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+  }
+  .tag {
+    margin: 0;
+    font: 600 15px var(--tt-font-mono);
+  }
+  .tag a {
+    color: var(--tt-ok);
+    text-decoration: none;
+  }
+  .tag a:hover {
+    text-decoration: underline;
+  }
+  .date {
+    font: 13px var(--tt-font-mono);
+    color: var(--tt-faint);
+  }
+  .notes {
+    color: var(--tt-muted);
+    font-size: 15px;
+    min-width: 0;
+    overflow-wrap: anywhere;
+  }
+  .notes :global(:first-child) {
+    margin-top: 0;
+  }
+  .notes :global(:last-child) {
+    margin-bottom: 0;
+  }
+  .notes :global(h4),
+  .notes :global(h5),
+  .notes :global(h6) {
+    color: var(--tt-fg);
+    font-size: 15px;
+    margin: 12px 0 6px;
+  }
+  .notes :global(ul) {
+    padding-left: 20px;
+  }
+  .notes :global(a) {
+    color: var(--tt-fg);
+  }
+  .notes :global(code) {
+    font-family: var(--tt-font-mono);
+    font-size: 0.9em;
+  }
+  @media (max-width: 820px) {
+    .rel {
+      grid-template-columns: minmax(0, 1fr);
+      gap: 8px;
+    }
+    .rel-meta {
+      flex-direction: row;
+      align-items: baseline;
+      gap: 12px;
+    }
+  }
+</style>

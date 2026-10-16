@@ -1,0 +1,74 @@
+[
+  {
+    "tag_name": "v0.2.0",
+    "name": "v0.2.0",
+    "html_url": "https://github.com/towertail/towertail/releases/tag/v0.2.0",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-10-16T01:15:23Z",
+    "body": "This is the first public release of Towertail for Mac.\n\nTowertail monitors a small fleet of remote servers from your menu bar. It usually connects over a Tailscale network. One panel shows one card for each host, with live CPU, memory, disk, and network values, sparklines, and threshold colors. It is like Stats.app, but for your servers.\n\n## What is in this release\n\n- **Menu bar panel.** One card for each host, with live values, sparklines, and threshold colors. Filter the cards by tag or by name.\n- **Full View.** One window for each host, with charts for CPU, memory, disk, and network, a process table, open ports, and health details.\n- **Agentless collection.** The app uses your `~/.ssh/config` and `/usr/bin/ssh`. On the first connection, it copies the `towertail-sampler` binary to `~/.towertail/` on the host. The host needs no daemon and no open port. The app also updates the sampler when a new app release bundles a new sampler.\n- **Supported hosts.** Linux (amd64, arm64, armv7) and macOS (Apple silicon, Intel). The app bundles [towertail/sampler v1.0.0](https://github.com/towertail/sampler/releases/tag/v1.0.0).\n- **Host discovery.** The app reads `tailscale status --json` and shows new hosts on your tailnet. You can also add hosts manually or import a list.\n- **Alerts.** Set thresholds for each metric. The app sends a macOS notification when a host crosses a CPU, memory, disk, or health threshold for a set time.\n- **History.** The app keeps 7 days of samples in a local SQLite database.\n- **Automatic updates.** The app finds new releases on GitHub, checks the code signature and the notarization, and replaces itself when you do not use it.\n\n## Install\n\nWith Homebrew:\n\n```bash\nbrew install --cask towertail/tap/towertail\n```\n\nOr download `Towertail.zip` below, unzip it, and move `Towertail.app` to `/Applications`. Then open it and look for the `server.rack` icon in the menu bar. Press \u2318, to open Preferences and add servers.\n\nThe app is signed with a Developer ID and notarized by Apple.\n\n## Requirements\n\n- macOS 14 Sonoma or later, on Apple silicon or Intel.\n- SSH access to each host. Key authentication is best. Password authentication also works (the app keeps the password in your login keychain).\n- Tailscale is optional. The app uses it only for host discovery.\n\n## Known limits\n\n- The Windows app has no release. Build it from source ([`apps/windows/README.md`](https://github.com/towertail/towertail/blob/main/apps/windows/README.md)).\n- The self-hosted server ([`server/`](https://github.com/towertail/towertail/tree/main/server)) is optional and new. The Mac app connects to it only through the environment variables `TOWERTAIL_REMOTE_URL` and `TOWERTAIL_REMOTE_TOKEN`. There is no setting in Preferences for it yet.\n- The Mac app cannot monitor Windows hosts.\n- The sampler does not read SMART data, temperatures, or per-process I/O that needs root.\n- Homebrew does not upgrade the app (`auto_updates true`), because the app updates itself. Use `brew upgrade --cask --greedy towertail` to make Homebrew do it.\n- `brew uninstall --zap` does not remove SSH passwords from the keychain (service `com.towertail.ssh`).\n\nReport problems on [GitHub Issues](https://github.com/towertail/towertail/issues).\n"
+  },
+  {
+    "tag_name": "v0.1.9",
+    "name": "v0.1.9",
+    "html_url": "https://github.com/towertail/towertail/releases/tag/v0.1.9",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-10-16T00:24:40Z",
+    "body": "## What's Changed\n* Make the Mac updater pick only app releases by @flarco in https://github.com/towertail/towertail/pull/24\n\n\n**Full Changelog**: https://github.com/towertail/towertail/compare/v0.1.8...v0.1.9"
+  },
+  {
+    "tag_name": "server/v0.1.0-rc.1",
+    "name": "Server 0.1.0-rc.1",
+    "html_url": "https://github.com/towertail/towertail/releases/tag/server/v0.1.0-rc.1",
+    "draft": false,
+    "prerelease": true,
+    "published_at": "2026-10-16T00:32:17Z",
+    "body": "**Full Changelog**: https://github.com/towertail/towertail/compare/v0.1.9...server/v0.1.0-rc.1"
+  },
+  {
+    "tag_name": "v0.1.8",
+    "name": "v0.1.8",
+    "html_url": "https://github.com/towertail/towertail/releases/tag/v0.1.8",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-10-16T00:06:34Z",
+    "body": "## What's Changed\n* Use the tagged sampler module and remove sampler/ by @flarco in https://github.com/towertail/towertail/pull/22\n\n\n**Full Changelog**: https://github.com/towertail/towertail/compare/v0.1.7...v0.1.8"
+  },
+  {
+    "tag_name": "v0.1.7",
+    "name": "v0.1.7",
+    "html_url": "https://github.com/towertail/towertail/releases/tag/v0.1.7",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-10-15T23:45:44Z",
+    "body": "## What's Changed\n* Use one sampler update rule in both apps and test with the release fixture by @flarco in https://github.com/towertail/towertail/pull/21\n\n\n**Full Changelog**: https://github.com/towertail/towertail/compare/v0.1.6...v0.1.7"
+  },
+  {
+    "tag_name": "v0.1.6",
+    "name": "v0.1.6",
+    "html_url": "https://github.com/towertail/towertail/releases/tag/v0.1.6",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-10-15T23:16:52Z",
+    "body": "## What's Changed\n* Split CI into mac.yml, windows.yml and server.yml by @flarco in https://github.com/towertail/towertail/pull/18\n* Get the sampler binaries from the pinned release by @flarco in https://github.com/towertail/towertail/pull/20\n\n## New Contributors\n* @flarco made their first contribution in https://github.com/towertail/towertail/pull/18\n\n**Full Changelog**: https://github.com/towertail/towertail/compare/v0.1.5...v0.1.6"
+  },
+  {
+    "tag_name": "v9.9.9",
+    "name": "draft",
+    "html_url": "https://github.com/towertail/towertail/releases/tag/v9.9.9",
+    "draft": true,
+    "prerelease": false,
+    "published_at": null,
+    "body": "draft"
+  },
+  {
+    "tag_name": "server/v0.1.0",
+    "name": "Server 0.1.0",
+    "html_url": "https://github.com/towertail/towertail/releases/tag/server%2Fv0.1.0",
+    "draft": false,
+    "prerelease": false,
+    "published_at": "2026-10-16T00:40:00Z",
+    "body": "First server release."
+  }
+]

@@ -1,0 +1,211 @@
+---
+// Cloudflare's "always passes" test key is the default for local builds.
+const siteKey = import.meta.env.PUBLIC_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
+const ranges = [
+  { value: "1-5", label: "1 to 5" },
+  { value: "6-20", label: "6 to 20" },
+  { value: "21-100", label: "21 to 100" },
+  { value: "100+", label: "More than 100" },
+];
+---
+
+<div class="cloud">
+  <div>
+    <span class="label">Towertail Cloud · planned</span>
+    <h2>Alerts when your laptop sleeps.</h2>
+    <p class="sub">The app watches your servers while your Mac is awake. Towertail Cloud will watch them all the time.</p>
+    <ul>
+      <li>Checks 24/7, with the same rules as the app</li>
+      <li>Phone push, email, Slack, Discord and webhooks</li>
+      <li>Longer history, and settings sync across devices</li>
+    </ul>
+  </div>
+  <div>
+    <form class="wl" method="post" action="/api/waitlist" data-wl>
+      <label>
+        Email
+        <input name="email" type="email" placeholder="you@example.com" autocomplete="email" maxlength="254" required />
+      </label>
+      <label>
+        How many hosts?
+        <select name="hosts">
+          {ranges.map((r) => <option value={r.value} selected={r.value === "6-20"}>{r.label}</option>)}
+        </select>
+      </label>
+      <input type="hidden" name="source" value={Astro.url.pathname} />
+      <div class="ts" data-sitekey={siteKey}></div>
+      <button class="btn primary" type="submit">Join the waitlist</button>
+      <p class="fine" role="status" aria-live="polite" data-wl-msg>
+        We send one email when the beta opens. No other email.
+      </p>
+    </form>
+    <div class="done" data-wl-done hidden>
+      <b>You are on the list.</b>
+      <span class="fine">We send one email when the beta opens.</span>
+    </div>
+  </div>
+</div>
+
+<script>
+  type Turnstile = { render: (el: HTMLElement, opts: Record<string, unknown>) => string };
+  declare global {
+    interface Window {
+      turnstile?: Turnstile;
+      ttTurnstileReady?: () => void;
+    }
+  }
+
+  const form = document.querySelector<HTMLFormElement>("[data-wl]");
+  if (form) {
+    const box = form.querySelector<HTMLElement>(".ts")!;
+    const msg = form.querySelector<HTMLElement>("[data-wl-msg]")!;
+    const done = document.querySelector<HTMLElement>("[data-wl-done]")!;
+
+    // Load Turnstile only when the form comes near the screen. This keeps the first load fast.
+    const load = () => {
+      if (document.querySelector("script[data-turnstile]")) return;
+      window.ttTurnstileReady = () => window.turnstile?.render(box, { sitekey: box.dataset.sitekey, theme: "auto" });
+      const s = document.createElement("script");
+      s.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit&onload=ttTurnstileReady";
+      s.async = true;
+      s.dataset.turnstile = "";
+      document.head.append(s);
+    };
+    new IntersectionObserver((entries, obs) => {
+      if (entries.some((e) => e.isIntersecting)) {
+        load();
+        obs.disconnect();
+      }
+    }, { rootMargin: "400px" }).observe(form);
+    form.addEventListener("focusin", load, { once: true });
+
+    form.addEventListener("submit", async (e) => {
+      e.preventDefault();
+      const email = form.elements.namedItem("email") as HTMLInputElement;
+      if (!email.checkValidity()) {
+        email.setAttribute("aria-invalid", "true");
+        email.focus();
+        msg.textContent = "Enter a valid email address.";
+        return;
+      }
+      email.removeAttribute("aria-invalid");
+      const data = Object.fromEntries(new FormData(form));
+      const button = form.querySelector("button")!;
+      button.disabled = true;
+      try {
+        const res = await fetch(form.action, {
+          method: "POST",
+          headers: { "content-type": "application/json" },
+          body: JSON.stringify(data),
+        });
+        if (res.ok) {
+          form.hidden = true;
+          done.hidden = false;
+          return;
+        }
+        const out = (await res.json().catch(() => ({}))) as { error?: string };
+        msg.textContent = out.error ?? "Something went wrong. Try again.";
+      } catch {
+        msg.textContent = "The network request failed. Try again.";
+      } finally {
+        button.disabled = false;
+      }
+    });
+  }
+</script>
+
+<style>
+  .cloud {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    gap: 40px;
+    background: var(--tt-panel);
+    border: 1px solid var(--tt-line);
+    border-radius: 16px;
+    padding: clamp(20px, 4vw, 40px);
+  }
+  h2 {
+    font-size: clamp(26px, 3.4vw, 34px);
+    letter-spacing: -0.02em;
+    margin: 10px 0 12px;
+  }
+  .sub {
+    margin-bottom: 20px;
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    color: var(--tt-muted);
+  }
+  li {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  li::before {
+    content: "→";
+    color: var(--tt-ok);
+    font-family: var(--tt-font-mono);
+  }
+  .wl {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+  .wl[hidden] {
+    display: none;
+  }
+  label {
+    font-size: 13px;
+    color: var(--tt-muted);
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+  }
+  input,
+  select {
+    font: 15px var(--tt-font-body);
+    color: var(--tt-fg);
+    background: var(--tt-bg);
+    border: 1px solid var(--tt-line);
+    border-radius: 8px;
+    padding: 11px 12px;
+    width: 100%;
+  }
+  input[aria-invalid="true"] {
+    border-color: var(--tt-crit);
+  }
+  .ts {
+    min-height: 65px;
+  }
+  .btn:disabled {
+    opacity: 0.6;
+    cursor: wait;
+  }
+  .fine {
+    margin: 0;
+  }
+  .done {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    border: 1px solid var(--tt-ok);
+    border-radius: 10px;
+    padding: 18px;
+  }
+  .done[hidden] {
+    display: none;
+  }
+  .done b {
+    color: var(--tt-ok);
+  }
+  @media (max-width: 820px) {
+    .cloud {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

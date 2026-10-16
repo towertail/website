@@ -1,6 +1,96 @@
 ---
 title: Install the sampler as a service
-description: Install the sampler as a service.
+description: Run the sampler as a systemd or launchd service that sends samples to a self-hosted Towertail server.
 ---
 
-This page is a placeholder.
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Experimental">
+The push mode and the `service` command are experimental. For the normal SSH setup, you do not need this page.
+</Aside>
+
+In push mode, the sampler sends samples over HTTPS to a [self-hosted Towertail server](/docs/self-host/quick-start/). The `service` command installs push mode as a background service:
+
+- On Linux, it installs a systemd unit.
+- On macOS, it installs a launchd agent or daemon.
+
+Other operating systems do not support the `service` command.
+
+## Before you start
+
+- A Towertail server that the host can reach.
+- A sampler token for this host. Read [Tokens](/docs/self-host/tokens/#sampler-tokens).
+
+## Install the service
+
+<Steps>
+1. Download the binary for your platform and `checksums.txt` from the [sampler releases](https://github.com/towertail/sampler/releases).
+2. Check the download:
+
+    ```sh
+    shasum -a 256 -c checksums.txt --ignore-missing
+    ```
+
+3. Put the binary in a permanent location and make it executable. The service runs the binary from the location where you run the install command.
+
+    ```sh
+    chmod +x towertail-sampler
+    ./towertail-sampler --version
+    ```
+
+4. Install the service. Use the URL of your server and your sampler token:
+
+    ```sh
+    ./towertail-sampler service install \
+      --endpoint https://towertail.example.com \
+      --token tt_your_sampler_token
+    ```
+</Steps>
+
+The install command writes the token to a file with mode 0600. Then it starts the service. The service sends one sample every 30 seconds by default.
+
+## Install options
+
+| Option | Default | Description |
+| --- | --- | --- |
+| `--endpoint` | (required) | The URL of the Towertail server. |
+| `--token` | (required) | The sampler token. |
+| `--interval` | `30s` | The time between two samples. |
+| `--system` | off | Install a system service. The default is a service for the current user. |
+| `--user` | (none) | Linux only. The user that runs a system service. |
+| `--allow-control` | off | Let the server send control messages to the sampler, for example to stop a process. |
+
+## Installed files
+
+<Tabs>
+  <TabItem label="Linux (systemd)">
+    | Item | Per user (default) | System (`--system`) |
+    | --- | --- | --- |
+    | Unit file | `~/.config/systemd/user/towertail-sampler.service` | `/etc/systemd/system/towertail-sampler.service` |
+    | Token file | `~/.config/towertail/sampler.token` | `/etc/towertail/sampler.token` |
+    | Log | journald, unit `towertail-sampler.service` | journald, unit `towertail-sampler.service` |
+  </TabItem>
+  <TabItem label="macOS (launchd)">
+    | Item | Per user (default) | System (`--system`) |
+    | --- | --- | --- |
+    | Plist | `~/Library/LaunchAgents/com.towertail.sampler.plist` | `/Library/LaunchDaemons/com.towertail.sampler.plist` |
+    | Token file | `~/Library/Application Support/Towertail/sampler.token` | `/etc/towertail/sampler.token` |
+    | Log | `~/Library/Logs/Towertail/sampler.log` | `/var/log/towertail-sampler.log` |
+  </TabItem>
+</Tabs>
+
+A system service writes to system folders. Run the install command with `sudo` when you use `--system`.
+
+## Manage the service
+
+| Command | Result |
+| --- | --- |
+| `towertail-sampler service status` | Shows the status of the service. |
+| `towertail-sampler service log` | Shows the log. Add `-f` to follow the log. |
+| `towertail-sampler service stop` | Stops the service. |
+| `towertail-sampler service start` | Starts the service. |
+| `towertail-sampler service uninstall` | Stops the service and removes the unit or plist and the token file. |
+
+<Aside type="caution">
+These commands do not accept `--system`. They operate on the per-user service only. For a system service, use `systemctl` or `launchctl` directly. For example: `sudo systemctl status towertail-sampler`.
+</Aside>

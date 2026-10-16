@@ -1,6 +1,78 @@
 ---
 title: How the sampler works
-description: How the sampler works.
+description: What Towertail puts on your servers, which permissions it needs, and which platforms it supports.
 ---
 
-This page is a placeholder.
+import { Aside } from '@astrojs/starlight/components';
+
+The sampler is a small Go binary with the name `towertail-sampler`. It reads the metrics of the host and writes them as one JSON sample. The binary has no runtime dependencies. The source is at [github.com/towertail/sampler](https://github.com/towertail/sampler).
+
+## What Towertail does on a server
+
+Towertail contains a sampler binary for each supported platform. When you test or deploy a server, Towertail does these steps over SSH:
+
+1. It runs `uname -sm` to find the operating system and the CPU architecture.
+2. It copies the correct binary to `~/.towertail/towertail-sampler` over SFTP.
+3. It runs the sampler one time to make sure that it works.
+
+At each poll, Towertail connects over SSH and runs `~/.towertail/towertail-sampler --once`. The sampler writes one JSON sample and stops. Towertail keeps the history on your Mac, not on the server.
+
+## What the sampler collects
+
+- CPU use, load averages and the number of cores
+- Memory and swap
+- Disk space for each mount, and disk read and write rates
+- Network receive and send rates
+- The top processes by CPU and by memory
+- Open ports and host health signals
+
+## Security
+
+- **No open port.** The sampler does not listen on a port. Towertail reaches it only through SSH.
+- **No daemon.** The sampler does not stay in memory between polls.
+- **No root.** The sampler runs as the SSH user. It does not use `sudo`.
+- **No network calls.** In the mode that Towertail uses, the sampler does not open network connections.
+- **No files.** The sampler does not write files on the host. The only file is the binary in `~/.towertail/`.
+
+Without root, the sampler sees less data on some hosts:
+
+- On macOS hosts, the process list shows only the processes of the SSH user.
+- On Linux hosts, per-process disk I/O shows only for the processes of the SSH user.
+
+All the other metrics work without root.
+
+## Supported platforms
+
+Towertail for Mac monitors these hosts over SSH:
+
+| Operating system | CPU architecture | Sampler target |
+| --- | --- | --- |
+| Linux | x86_64 | `linux-amd64` |
+| Linux | arm64 (aarch64) | `linux-arm64` |
+| macOS | Intel (x86_64) | `darwin-amd64` |
+| macOS | Apple silicon (arm64) | `darwin-arm64` |
+
+The [sampler releases](https://github.com/towertail/sampler/releases) also include `linux-armv7`, `windows-amd64` and `windows-arm64`. Towertail for Mac does not connect to these hosts over SSH.
+
+## Sampler updates
+
+A new version of Towertail can contain a new sampler. To copy it to your servers automatically, open the settings, select the **Servers** tab, and turn on **Auto-update Remote Samplers**. It is off by default.
+
+To copy the sampler again by hand, select one or more servers in the **Servers** tab and click **Reinstall Sampler**.
+
+## Check the sampler on a server
+
+Log in to the server and run these commands:
+
+```sh
+~/.towertail/towertail-sampler --version
+~/.towertail/towertail-sampler --self-check
+```
+
+The `--self-check` command prints `ok` when the sampler works on this host.
+
+To remove the sampler from a server, run `rm -rf ~/.towertail` on that server.
+
+<Aside type="tip" title="For developers">
+The JSON schema, the flags and the bootstrap handshake are in the [sampler wire format](https://github.com/towertail/sampler/blob/main/docs/wire-format.md).
+</Aside>

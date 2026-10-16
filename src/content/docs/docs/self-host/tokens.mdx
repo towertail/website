@@ -1,6 +1,88 @@
 ---
 title: Tokens
-description: Tokens.
+description: Make bearer tokens for the Mac app, for administrators and for samplers on a self-hosted Towertail server.
 ---
 
-This page is a placeholder.
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+Each client sends a bearer token to the server. A token starts with `tt_`. The server keeps only a SHA-256 hash of each token. It shows the token one time only, when you make it. Keep the token in a safe place.
+
+## Token kinds
+
+| Kind | Use | Access |
+| --- | --- | --- |
+| `user` | The Mac app | The API, but not ingest and not control. |
+| `admin` | Administrators | All that `user` can do, and token management. |
+| `sampler` | One sampler in push mode | Ingest and control for one node only. |
+
+## Issue a token
+
+Use the `towertail-server token issue` command:
+
+| Option | Description |
+| --- | --- |
+| `--kind` | Required. `user`, `admin` or `sampler`. |
+| `--label` | A name for the token, for example the name of a person or a host. |
+| `--node-id` | The UUID of the node. Use it for sampler tokens. |
+
+The command and the server use the same BoltDB file. While the server runs, it locks this file. Thus, stop the server before you issue a token:
+
+<Steps>
+1. Go to the `server/docker` folder.
+2. Stop the server:
+
+    ```sh
+    docker compose stop server
+    ```
+
+3. Issue the token:
+
+    ```sh
+    docker compose run --rm server token issue --kind=user --label=me
+    ```
+
+    The command prints the token on stdout.
+
+4. Start the server again:
+
+    ```sh
+    docker compose start server
+    ```
+</Steps>
+
+## Bootstrap token
+
+You can also give the server an admin token at the start. Set `TT_AUTH__BOOTSTRAP_TOKEN` to a secret value. At each start, the server adds this value as an admin token if it does not have it. For settings, read [Configuration](/docs/self-host/configuration/).
+
+## Sampler tokens
+
+A sampler token is bound to one node. The server refuses samples from a sampler token without a node.
+
+To make a node and its sampler token in one step, send a user or admin token to the enroll endpoint:
+
+```sh
+curl -X POST https://towertail.example.com/v1/sampler/enroll \
+  -H "Authorization: Bearer tt_your_user_token" \
+  -H "Content-Type: application/json" \
+  -d '{"display_name": "web-1"}'
+```
+
+The response contains `node_id` and `sampler_token`. Use the sampler token with [the sampler service](/docs/sampler/service-install/).
+
+To make a sampler token for a node that exists, use the command line with `--kind=sampler --node-id=<uuid>`.
+
+## Connect the Mac app
+
+<Aside type="caution" title="Preview">
+The Mac app has no settings screen for a server. It reads the server URL and the token from environment variables at start.
+</Aside>
+
+Quit Towertail. Then start it from Terminal with the URL of your server and a user token:
+
+```sh
+TOWERTAIL_REMOTE_URL=https://towertail.example.com \
+TOWERTAIL_REMOTE_TOKEN=tt_your_user_token \
+/Applications/Towertail.app/Contents/MacOS/Towertail
+```
+
+When one of the two variables is not set, the app uses its normal SSH mode.

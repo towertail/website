@@ -1,6 +1,47 @@
 ---
 title: Tailscale
-description: Tailscale.
+description: Import the servers on your tailnet into Towertail, with their Tailscale IP addresses or MagicDNS names.
 ---
 
-This page is a placeholder.
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+Towertail can read the list of peers on your tailnet and add them as SSH servers. Tailscale is optional. Towertail also connects to servers that are not on a tailnet.
+
+## Requirements
+
+- The Tailscale app for macOS is in `/Applications/Tailscale.app`.
+- Tailscale runs on your Mac and you are logged in.
+- Each peer accepts SSH logins. Towertail uses the normal SSH server on the peer.
+
+If Towertail cannot find Tailscale, the **Tailscale** source shows "Tailscale not detected" and you cannot select it.
+
+## Import your tailnet
+
+<Steps>
+1. Open the settings and select the **Servers** tab.
+2. Click **Import…**.
+3. Select **Tailscale**. Towertail gets the list of peers from the Tailscale app. Your own Mac is not in the list.
+4. Optional: turn on **Prefer MagicDNS name over IP**. Read [MagicDNS names](#magicdns-names).
+5. Click **Next**.
+6. Examine the list. Clear the check box of each peer that you do not want.
+7. Set the SSH user. Towertail uses your Mac user name as the default. To change it for all rows, type a name in **Default SSH user** and click **Apply user**.
+8. Set the login for each row: **Key** or **Password**. For keys, read [Add hosts](/docs/add-hosts/#prepare-an-ssh-key).
+9. Optional: click **Test all selected**.
+10. Click **Deploy**. Towertail connects to each server and copies the sampler to it.
+</Steps>
+
+Towertail copies the Tailscale tags of each peer to the tags of the server.
+
+## MagicDNS names
+
+By default, Towertail uses the Tailscale IP address of each peer, for example `100.x.y.z`.
+
+When you turn on **Prefer MagicDNS name over IP**, Towertail uses the MagicDNS name of the peer, for example `db-primary.tailnet-name.ts.net`. Towertail remembers this choice for the next import.
+
+<Aside type="tip">
+A MagicDNS name stays the same when the IP address of a peer changes. Use MagicDNS names if MagicDNS is on in your tailnet.
+</Aside>
+
+## Add one tailnet server
+
+You can also add one peer by hand. Follow the steps in [Add hosts](/docs/add-hosts/#add-a-server). In **Address**, type the Tailscale IP address or the MagicDNS name of the peer.

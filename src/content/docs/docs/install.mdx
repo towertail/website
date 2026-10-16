@@ -1,6 +1,92 @@
 ---
 title: Install
-description: Install.
+description: Install Towertail on your Mac with Homebrew or a zip file, and keep it up to date.
 ---
 
-This page is a placeholder.
+import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
+
+Towertail needs macOS 14 Sonoma or later. It runs on Apple silicon and Intel Macs.
+
+## Install the app
+
+<Tabs syncKey="install">
+  <TabItem label="Homebrew">
+    <Steps>
+    1. Install the cask:
+
+        ```sh
+        brew install --cask towertail/tap/towertail
+        ```
+
+    2. Open Towertail from the Applications folder.
+    </Steps>
+  </TabItem>
+  <TabItem label="Zip file">
+    <Steps>
+    1. Download [Towertail.zip](https://github.com/towertail/towertail/releases/latest/download/Towertail.zip).
+    2. Open the zip file.
+    3. Move `Towertail.app` to the Applications folder.
+    4. Open Towertail from the Applications folder.
+    </Steps>
+  </TabItem>
+</Tabs>
+
+Towertail has no Dock icon and no main window. Look for the server-rack icon in the menu bar. Click the icon to open the popover.
+
+At the first start, the popover shows one card: **This Mac**. To add servers, read [Add hosts](/docs/add-hosts/).
+
+To open the settings, click the gear icon in the popover header.
+
+## Updates
+
+Towertail updates itself from the GitHub releases. It checks for a new release 15 seconds after it starts, and then every 6 hours.
+
+Towertail installs an update when you do not use the app. Then it starts the new version.
+
+To change the update behavior, open the settings and select the **General** tab:
+
+- **Install updates automatically** is on by default. When it is off, Towertail only tells you that a new version is available.
+- **Check for Updates** checks now.
+
+<Aside type="note">
+The updater replaces the app in its folder. Keep `Towertail.app` in a folder that your user can write to, for example Applications.
+</Aside>
+
+## Uninstall
+
+<Tabs syncKey="install">
+  <TabItem label="Homebrew">
+    To remove the app and keep your settings:
+
+    ```sh
+    brew uninstall --cask towertail
+    ```
+
+    To remove the app and all its data on this Mac:
+
+    ```sh
+    brew uninstall --zap --cask towertail
+    ```
+
+    The `--zap` option also removes these items:
+
+    - `~/.towertail`
+    - `~/Library/Application Support/Towertail`
+    - `~/Library/Caches/com.towertail.Towertail`
+    - `~/Library/HTTPStorages/com.towertail.Towertail`
+    - `~/Library/Preferences/com.towertail.Towertail.plist`
+  </TabItem>
+  <TabItem label="Zip file">
+    <Steps>
+    1. Quit Towertail. Click the power icon in the popover header.
+    2. Move `Towertail.app` to the Trash.
+    3. To remove your servers and settings too, delete `~/Library/Application Support/Towertail`.
+    </Steps>
+  </TabItem>
+</Tabs>
+
+Towertail does not remove the sampler from your servers. To remove it, run this command on each server:
+
+```sh
+rm -rf ~/.towertail
+```

@@ -1,6 +1,99 @@
 ---
 title: Self-host quick start
-description: Self-host quick start.
+description: Start the Towertail server, ClickHouse and Caddy on one host with Docker Compose.
 ---
 
-This page is a placeholder.
+import { Steps, Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Preview">
+The Towertail server is in an early stage. The Mac app works without it. You need the server only if samplers push their data to one central place.
+</Aside>
+
+The server receives samples from samplers in push mode. It keeps the time series in ClickHouse and evaluates the thresholds. The Mac app reads the data from the server over a REST and WebSocket API.
+
+The Docker Compose stack has three services:
+
+| Service | What it does |
+| --- | --- |
+| `server` | The Towertail server. It listens on port 8080, on `127.0.0.1` only. |
+| `clickhouse` | Keeps the metrics. |
+| `caddy` | Terminates TLS on ports 80 and 443, and sends requests to the server. |
+
+## Requirements
+
+- A host with Docker and Docker Compose.
+- Git, to get the source. The stack builds the server image from the source.
+
+## Start the stack
+
+<Steps>
+1. Get the source and go to the Docker folder:
+
+    ```sh
+    git clone https://github.com/towertail/towertail.git
+    cd towertail/server/docker
+    ```
+
+2. Write a strong ClickHouse password to the secret file:
+
+    ```sh
+    openssl rand -hex 32 > secrets/ch_password
+    ```
+
+3. Build and start the stack:
+
+    ```sh
+    docker compose up -d --build
+    ```
+
+4. Make sure that the server is up:
+
+    ```sh
+    curl http://127.0.0.1:8080/healthz
+    curl http://127.0.0.1:8080/readyz
+    ```
+
+    The `/readyz` endpoint returns `503` until the server connects to ClickHouse.
+</Steps>
+
+Then make a user token for the Mac app. Read [Tokens](/docs/self-host/tokens/).
+
+## Reach the server
+
+Caddy serves the site `towertail.local`. To use this name on the host, add a line to `/etc/hosts` that points `towertail.local` to `127.0.0.1`. For a real domain, edit `caddy/Caddyfile`.
+
+<Aside type="danger">
+The server itself uses plain HTTP on port 8080. Do not open port 8080 to the internet. Use Caddy for TLS.
+</Aside>
+
+## Logs
+
+```sh
+docker compose logs -f server
+```
+
+The server writes JSON logs to stdout. Each change to a node or to the settings writes one log line with `msg=audit`.
+
+## Upgrade
+
+<Steps>
+1. Get the new source:
+
+    ```sh
+    git pull
+    ```
+
+2. Build and start the new server:
+
+    ```sh
+    docker compose up -d --build server
+    ```
+</Steps>
+
+ClickHouse migrations apply automatically when the server connects. Mac apps and samplers connect again automatically.
+
+## Backup
+
+The server keeps nodes, tokens and settings in one BoltDB file, `config.db`, in the `server-data` volume. Copy this file while the server is stopped. If you lose this file, you lose the configuration, but not the metrics.
+
+For settings, read [Configuration](/docs/self-host/configuration/).

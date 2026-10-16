@@ -1,6 +1,72 @@
 ---
 title: Configuration
-description: Configuration.
+description: All TT_* settings of the Towertail server, with their YAML keys and default values.
 ---
 
-This page is a placeholder.
+import { Aside } from '@astrojs/starlight/components';
+
+The server reads its settings in this order. A later source overrides an earlier one:
+
+1. The defaults in the code.
+2. A YAML file. Give its path in `TT_CONFIG_FILE` or with the `--config` option.
+3. Environment variables that start with `TT_`.
+
+## Names of the variables
+
+A variable name has the prefix `TT_`, then the section, two underscores, and the key. For example, the YAML key `http.addr` is the variable `TT_HTTP__ADDR`.
+
+<Aside type="caution">
+Use two underscores between the section and the key. The server ignores a name with one underscore, for example `TT_HTTP_ADDR`.
+</Aside>
+
+The same settings in a YAML file:
+
+```yaml
+http:
+  addr: ":8080"
+  cors_allow_origins:
+    - "https://towertail.example.com"
+log:
+  level: info
+```
+
+## HTTP
+
+| Variable | YAML key | Default | Description |
+| --- | --- | --- | --- |
+| `TT_HTTP__ADDR` | `http.addr` | `:8080` | The listen address. |
+| `TT_HTTP__READ_TIMEOUT` | `http.read_timeout` | `30s` | The read timeout for a request. |
+| `TT_HTTP__WRITE_TIMEOUT` | `http.write_timeout` | `30s` | The write timeout for a response. |
+| `TT_HTTP__SHUTDOWN_TIMEOUT` | `http.shutdown_timeout` | `10s` | The maximum time for a clean stop. |
+| `TT_HTTP__CORS_ALLOW_ORIGINS` | `http.cors_allow_origins` | `*` | The allowed CORS origins. A variable sets one origin. For a list, use the YAML file. |
+| `TT_HTTP__RATE_LIMIT_RPS` | `http.rate_limit_rps` | `100` | Requests per second for each IP address, for all routes except `/v1/ingest`. |
+| `TT_HTTP__INGEST_RATE_LIMIT_RPS` | `http.ingest_rate_limit_rps` | `1000` | Requests per second for each IP address, for the sampler routes `/v1/ingest` and `/v1/control`. |
+
+## ClickHouse
+
+| Variable | YAML key | Default | Description |
+| --- | --- | --- | --- |
+| `TT_CLICKHOUSE__ADDR` | `clickhouse.addr` | `clickhouse:9000` | The ClickHouse address. |
+| `TT_CLICKHOUSE__DATABASE` | `clickhouse.database` | `towertail` | The database name. |
+| `TT_CLICKHOUSE__USER` | `clickhouse.user` | `towertail` | The user name. |
+| `TT_CLICKHOUSE__PASSWORD` | `clickhouse.password` | (empty) | The password. |
+| `TT_CLICKHOUSE__PASSWORD_FILE` | `clickhouse.password_file` | (empty) | A file that contains the password. The server reads it when the password is empty. |
+| `TT_CLICKHOUSE__DIAL_TIMEOUT` | `clickhouse.dial_timeout` | `5s` | The connection timeout. |
+| `TT_CLICKHOUSE__MAX_OPEN_CONNS` | `clickhouse.max_open_conns` | `16` | The maximum number of open connections. |
+| `TT_CLICKHOUSE__MAX_IDLE_CONNS` | `clickhouse.max_idle_conns` | `4` | The maximum number of idle connections. |
+| `TT_CLICKHOUSE__CONN_MAX_LIFETIME` | `clickhouse.conn_max_lifetime` | `10m` | The maximum life of a connection. |
+| `TT_CLICKHOUSE__BATCH_FLUSH_ROWS` | `clickhouse.batch_flush_rows` | `5000` | The server writes a batch when it has this number of rows. |
+| `TT_CLICKHOUSE__BATCH_FLUSH_BYTES` | `clickhouse.batch_flush_bytes` | `1048576` | The server writes a batch when it has this number of bytes. |
+| `TT_CLICKHOUSE__BATCH_FLUSH_PERIOD` | `clickhouse.batch_flush_period` | `1s` | The server writes a batch at least at this interval. |
+| `TT_CLICKHOUSE__DISABLED` | `clickhouse.disabled` | `false` | For tests only. When `true`, the server does not keep metrics and has no history. |
+
+## Other settings
+
+| Variable | YAML key | Default | Description |
+| --- | --- | --- | --- |
+| `TT_STORAGE__PATH` | `storage.path` | `/var/lib/towertail` | The folder for `config.db`, which keeps nodes, tokens and settings. |
+| `TT_INGEST__MAX_BODY_BYTES` | `ingest.max_body_bytes` | `16777216` (16 MiB) | The maximum size of one ingest request. |
+| `TT_AUTH__BOOTSTRAP_TOKEN` | `auth.bootstrap_token` | (empty) | An admin token that the server adds at the start. Read [Tokens](/docs/self-host/tokens/#bootstrap-token). |
+| `TT_LOG__LEVEL` | `log.level` | `info` | `debug`, `info`, `warn` or `error`. |
+| `TT_LOG__FORMAT` | `log.format` | `json` | `json` or `text`. |
+| `TT_CLOUD__MANAGED` | `cloud.managed` | `false` | Keep `false` for a self-hosted server. |

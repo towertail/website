@@ -1,0 +1,51 @@
+<!doctype html>
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  @font-face { font-family: Geist; src: url(../../node_modules/@fontsource-variable/geist/files/geist-latin-wght-normal.woff2); font-weight: 100 900; }
+  @font-face { font-family: GeistMono; src: url(../../node_modules/@fontsource-variable/geist-mono/files/geist-mono-latin-wght-normal.woff2); font-weight: 100 900; }
+  * { box-sizing: border-box; }
+  body { margin: 0; width: 1200px; height: 630px; background: #121214; color: #f2f2f4; font-family: Geist; overflow: hidden; }
+  .wrap { display: grid; grid-template-columns: 1fr 440px; gap: 56px; padding: 72px 72px; height: 100%; align-items: center;
+    background: radial-gradient(800px 400px at 85% 20%, rgba(48,209,88,.10), transparent 70%); }
+  .brand { display: flex; gap: 14px; align-items: center; font-weight: 700; font-size: 30px; }
+  h1 { font-size: 66px; line-height: 1.04; letter-spacing: -.03em; margin: 36px 0 24px; font-weight: 700; }
+  p { color: #9a9aa2; font-size: 26px; margin: 0; line-height: 1.4; }
+  .url { margin-top: 36px; font: 500 22px GeistMono; color: #30d158; }
+  .pop { background: #1c1c1e; border: 1px solid #2e2e33; border-radius: 18px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: 0 40px 80px -30px rgba(0,0,0,.8); }
+  .card { border: 1px solid #2e2e33; border-radius: 12px; padding: 14px; background: #202023; display: flex; flex-direction: column; gap: 12px; }
+  .card.warn { border-color: #ff9f0a; } .card.crit { border-color: #ff453a; }
+  .h { display: flex; gap: 10px; align-items: center; font-weight: 600; font-size: 19px; }
+  .h span { margin-left: auto; font: 13px GeistMono; color: #85858e; }
+  .dot { width: 10px; height: 10px; border-radius: 50%; background: #30d158; }
+  .dot.warn { background: #ff9f0a; } .dot.crit { background: #ff453a; }
+  .cells { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; }
+  .cell { background: #232326; border-radius: 8px; padding: 8px 10px; }
+  .k { font: 500 11px GeistMono; letter-spacing: .12em; color: #85858e; }
+  .v { font-weight: 600; font-size: 21px; margin-top: 2px; }
+  .v.warn { color: #ff9f0a; } .v.crit { color: #ff453a; }
+</style>
+</head>
+<body>
+<div class="wrap">
+  <div>
+    <div class="brand">
+      <svg width="34" height="34" viewBox="0 0 20 20" fill="none"><rect x="2.5" y="3" width="15" height="6" rx="2" stroke="#f2f2f4" stroke-width="1.6"/><rect x="2.5" y="11" width="15" height="6" rx="2" stroke="#f2f2f4" stroke-width="1.6"/><circle cx="6" cy="6" r="1.2" fill="#30d158"/><circle cx="6" cy="14" r="1.2" fill="#30d158"/></svg>
+      Towertail
+    </div>
+    <h1 id="title">Your whole fleet, one click from the menu bar.</h1>
+    <p>CPU, memory, disk and network for each server. Over SSH and Tailscale. No agent.</p>
+    <div class="url">towertail.com</div>
+  </div>
+  <div class="pop">
+    <div class="card"><div class="h"><i class="dot"></i>web-edge-1<span>linux/arm64</span></div>
+      <div class="cells"><div class="cell"><div class="k">CPU</div><div class="v">42%</div></div><div class="cell"><div class="k">MEM</div><div class="v">54%</div></div><div class="cell"><div class="k">DISK</div><div class="v">37%</div></div><div class="cell"><div class="k">LOAD</div><div class="v">0.8</div></div></div></div>
+    <div class="card warn"><div class="h"><i class="dot warn"></i>db-primary<span>linux/x86_64</span></div>
+      <div class="cells"><div class="cell"><div class="k">CPU</div><div class="v">42%</div></div><div class="cell"><div class="k">MEM</div><div class="v warn">81%</div></div><div class="cell"><div class="k">DISK</div><div class="v">37%</div></div><div class="cell"><div class="k">LOAD</div><div class="v">1.2</div></div></div></div>
+    <div class="card crit"><div class="h"><i class="dot crit"></i>queue-worker-2<span>linux/arm64</span></div>
+      <div class="cells"><div class="cell"><div class="k">CPU</div><div class="v">78%</div></div><div class="cell"><div class="k">MEM</div><div class="v">54%</div></div><div class="cell"><div class="k">DISK</div><div class="v crit">96%</div></div><div class="cell"><div class="k">LOAD</div><div class="v">3.4</div></div></div></div>
+  </div>
+</div>
+</body>
+</html>

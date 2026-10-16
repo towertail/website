@@ -26,5 +26,9 @@
       "simple": { "limit": 5, "period": 60 }
     }
   ],
+  "routes": [
+    { "pattern": "towertail.com", "custom_domain": true },
+    { "pattern": "www.towertail.com", "custom_domain": true }
+  ],
   "observability": { "enabled": true }
 }

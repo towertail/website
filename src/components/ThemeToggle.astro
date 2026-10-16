@@ -1,0 +1,37 @@
+<button class="theme-toggle" type="button" aria-label="Switch between dark and light theme">
+  <svg width="16" height="16" viewBox="0 0 16 16" aria-hidden="true"
+    ><circle cx="8" cy="8" r="6.5" fill="none" stroke="currentColor" stroke-width="1.5"></circle><path
+      d="M8 1.5a6.5 6.5 0 0 1 0 13z"
+      fill="currentColor"></path></svg
+  >
+</button>
+
+<script>
+  document.querySelectorAll<HTMLButtonElement>(".theme-toggle").forEach((btn) => {
+    btn.addEventListener("click", () => {
+      const root = document.documentElement;
+      const current =
+        root.dataset.theme ?? (matchMedia("(prefers-color-scheme: light)").matches ? "light" : "dark");
+      const next = current === "light" ? "dark" : "light";
+      root.dataset.theme = next;
+      try {
+        localStorage.setItem("starlight-theme", next);
+      } catch {}
+    });
+  });
+</script>
+
+<style>
+  .theme-toggle {
+    display: inline-flex;
+    padding: 6px;
+    border: 1px solid var(--tt-line);
+    border-radius: 6px;
+    background: transparent;
+    color: var(--tt-muted);
+    cursor: pointer;
+  }
+  .theme-toggle:hover {
+    color: var(--tt-fg);
+  }
+</style>

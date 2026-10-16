@@ -1,0 +1,39 @@
+---
+import "@fontsource-variable/geist";
+import "@fontsource-variable/geist-mono";
+import "../styles/tokens.css";
+import "../styles/base.css";
+import Head from "../components/Head.astro";
+import Header from "../components/Header.astro";
+import Footer from "../components/Footer.astro";
+import ThemeToggle from "../components/ThemeToggle.astro";
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+const { title, description } = Astro.props;
+---
+
+<!doctype html>
+<html lang="en">
+  <head>
+    <Head title={title} description={description} />
+    <script is:inline>
+      // Use the same key as Starlight, so the theme is the same on all pages.
+      try {
+        const t = localStorage.getItem("starlight-theme");
+        if (t === "light" || t === "dark") document.documentElement.dataset.theme = t;
+      } catch {}
+    </script>
+  </head>
+  <body>
+    <header class="top">
+      <div class="wrap"><Header><ThemeToggle /></Header></div>
+    </header>
+    <main id="main">
+      <slot />
+    </main>
+    <div class="wrap"><Footer /></div>
+  </body>
+</html>

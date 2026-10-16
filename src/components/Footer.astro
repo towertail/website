@@ -1,0 +1,39 @@
+---
+import { GITHUB_ORG, TRADEMARK_URL } from "../config/site";
+---
+
+<footer class="tt-footer">
+  <div class="tt-footer-in">
+    <span>
+      © {new Date().getFullYear()} Towertail · Site code MIT · The Towertail name, logo and screenshots are
+      not under MIT. <a href={TRADEMARK_URL}>Trademark</a>.
+    </span>
+    <nav aria-label="Footer">
+      <a href="/docs/">Docs</a>
+      <a href="/changelog/">Changelog</a>
+      <a href={GITHUB_ORG}>GitHub</a>
+    </nav>
+  </div>
+</footer>
+
+<style>
+  .tt-footer {
+    border-top: 1px solid var(--tt-line);
+    padding-block: 32px 48px;
+    color: var(--tt-faint);
+    font-size: 13px;
+  }
+  .tt-footer-in {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px 32px;
+    justify-content: space-between;
+  }
+  .tt-footer a {
+    color: var(--tt-muted);
+  }
+  .tt-footer nav {
+    display: flex;
+    gap: 20px;
+  }
+</style>

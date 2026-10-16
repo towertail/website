@@ -1,0 +1,38 @@
+@import "@fontsource-variable/geist";
+@import "@fontsource-variable/geist-mono";
+@import "./tokens.css";
+
+:root {
+  --sl-font: var(--tt-font-body);
+  --sl-font-mono: var(--tt-font-mono);
+  --sl-color-white: var(--tt-fg);
+  --sl-color-gray-1: #dcdce1;
+  --sl-color-gray-2: #c2c2c8;
+  --sl-color-gray-3: var(--tt-muted);
+  --sl-color-gray-4: #6b6b73;
+  --sl-color-gray-5: var(--tt-line);
+  --sl-color-gray-6: var(--tt-panel);
+  --sl-color-black: var(--tt-bg);
+  --sl-color-accent-low: #0f3019;
+  --sl-color-accent: var(--tt-ok);
+  --sl-color-accent-high: #a8f0bb;
+  --sl-color-bg-nav: var(--tt-bg);
+  --sl-color-bg-sidebar: var(--tt-bg);
+}
+
+:root[data-theme="light"] {
+  --sl-color-white: var(--tt-fg);
+  --sl-color-gray-1: #2a2a2f;
+  --sl-color-gray-2: #3d3d44;
+  --sl-color-gray-3: var(--tt-muted);
+  --sl-color-gray-4: #8e8e93;
+  --sl-color-gray-5: var(--tt-line);
+  --sl-color-gray-6: var(--tt-cell);
+  --sl-color-gray-7: var(--tt-bg);
+  --sl-color-black: #ffffff;
+  --sl-color-accent-low: #d4f5dc;
+  --sl-color-accent: var(--tt-ok);
+  --sl-color-accent-high: #0e4d20;
+  --sl-color-bg-nav: #ffffff;
+  --sl-color-bg-sidebar: #ffffff;
+}

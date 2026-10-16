@@ -17,7 +17,7 @@ export default defineConfig({
   ],
   // Serve dist/ through the Worker. Run `pnpm build` first.
   webServer: {
-    command: `pnpm wrangler dev --port ${PORT} --var TURNSTILE_SECRET:1x0000000000000000000000000000000AA`,
+    command: `pnpm wrangler d1 migrations apply towertail-web --local && pnpm wrangler dev --port ${PORT} --var TURNSTILE_SECRET:1x0000000000000000000000000000000AA`,
     url: `http://localhost:${PORT}/api/health`,
     reuseExistingServer: !process.env.CI,
     timeout: 60_000,

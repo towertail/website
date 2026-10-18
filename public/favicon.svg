@@ -1,10 +1,11 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="none">
   <style>
-    .s { stroke: #17171a; } .f { fill: #1a7f37; }
-    @media (prefers-color-scheme: dark) { .s { stroke: #f2f2f4; } .f { fill: #30d158; } }
+    .s { stroke: #17171a; } .f { fill: #1a7f37; } .p { stroke: #1a7f37; }
+    @media (prefers-color-scheme: dark) { .s { stroke: #f2f2f4; } .f { fill: #30d158; } .p { stroke: #30d158; } }
   </style>
-  <rect class="s" x="2.5" y="3" width="15" height="6" rx="2" stroke-width="1.8"/>
-  <rect class="s" x="2.5" y="11" width="15" height="6" rx="2" stroke-width="1.8"/>
-  <circle class="f" cx="6" cy="6" r="1.3"/>
-  <circle class="f" cx="6" cy="14" r="1.3"/>
+  <rect class="s" x="2.5" y="2" width="15" height="5" rx="1.8" stroke-width="1.8"/>
+  <rect class="s" x="2.5" y="9" width="15" height="5" rx="1.8" stroke-width="1.8"/>
+  <circle class="f" cx="5.6" cy="4.5" r="1.2"/>
+  <circle class="f" cx="5.6" cy="11.5" r="1.2"/>
+  <path class="p" d="M2 16.9 H7 L8.4 15.2 L10.1 18.8 L11.6 16.1 L12.5 16.9 H18" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

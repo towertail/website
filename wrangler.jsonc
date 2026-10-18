@@ -15,7 +15,7 @@
       "binding": "DB",
       "database_name": "towertail-web",
       // Set the real id in the deploy ticket (TOWERTAIL-40).
-      "database_id": "00000000-0000-0000-0000-000000000000",
+      "database_id": "91b96a66-7d28-47d3-b04a-be1c62e71a4c",
       "migrations_dir": "migrations"
     }
   ],

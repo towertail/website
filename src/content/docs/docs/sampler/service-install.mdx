@@ -24,16 +24,17 @@ Other operating systems do not support the `service` command.
 ## Install the service
 
 <Steps>
-1. Download the binary for your platform and `checksums.txt` from the [sampler releases](https://github.com/towertail/sampler/releases).
+1. Download the binary for your platform and `checksums.txt` from the [sampler releases](https://github.com/towertail/sampler/releases). The name of the binary has the platform, for example `towertail-sampler-linux-amd64`.
 2. Check the download:
 
     ```sh
     shasum -a 256 -c checksums.txt --ignore-missing
     ```
 
-3. Put the binary in a permanent location and make it executable. The service runs the binary from the location where you run the install command.
+3. Put the binary in a permanent location, with the name `towertail-sampler`. Make it executable. The service runs the binary from the location where you run the install command.
 
     ```sh
+    mv towertail-sampler-linux-amd64 towertail-sampler
     chmod +x towertail-sampler
     ./towertail-sampler --version
     ```
@@ -59,6 +60,7 @@ The install command writes the token to a file with mode 0600. Then it starts th
 | `--system` | off | Install a system service. The default is a service for the current user. |
 | `--user` | (none) | Linux only. The user that runs a system service. |
 | `--allow-control` | off | Let the server send control messages to the sampler, for example to stop a process. |
+| `--allow-disk-scan` | off | Let the server ask the sampler for a disk scan. Read [Allow disk scans](#allow-disk-scans). |
 
 ## Installed files
 
@@ -80,6 +82,36 @@ The install command writes the token to a file with mode 0600. Then it starts th
 </Tabs>
 
 A system service writes to system folders. Run the install command with `sudo` when you use `--system`.
+
+## Allow disk scans
+
+A disk scan sends the names and sizes of the folders of the host to the server. Thus the server asks for a scan only when you allow it in two places:
+
+<Steps>
+1. In the Mac app, open the full view of the host. Select **DISK**, then **Usage**. Click **Allow disk scans**.
+2. On the host, remove the service:
+
+    ```sh
+    ./towertail-sampler service uninstall
+    ```
+
+    This command removes only a per-user service. For a system service, read [Manage the service](#manage-the-service).
+
+3. Install the service again with the same sampler token and `--allow-disk-scan`:
+
+    ```sh
+    ./towertail-sampler service install \
+      --endpoint https://towertail.example.com \
+      --token tt_your_sampler_token \
+      --allow-disk-scan
+    ```
+</Steps>
+
+<Aside type="caution">
+Do not run `service install` on a service that runs. The install command does not restart the service, so the new options have no effect.
+</Aside>
+
+The scan does not change files. For more information, read [Disk scans](/docs/sampler/how-it-works/#disk-scans).
 
 ## Manage the service
 

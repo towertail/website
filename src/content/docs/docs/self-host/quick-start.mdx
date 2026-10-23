@@ -22,7 +22,9 @@ The Docker Compose stack has three services:
 ## Requirements
 
 - A host with Docker and Docker Compose.
-- Git, to get the source. The stack builds the server image from the source.
+- Git, to get the compose files.
+
+The steps below build the server image from the source. You can also use the published image `ghcr.io/towertail/server` (`linux/amd64` and `linux/arm64`). Read [Use the published image](#use-the-published-image).
 
 ## Start the stack
 
@@ -58,6 +60,16 @@ The Docker Compose stack has three services:
 
 Then make a user token for the Mac app. Read [Tokens](/docs/self-host/tokens/).
 
+## Use the published image
+
+Each server release has an image on GitHub Container Registry. The versions are on the [releases page](https://github.com/towertail/towertail/releases), with tags that start with `server/v`. To use an image in place of a build, set `TOWERTAIL_VERSION` to a version, and do not use `--build`:
+
+```sh
+export TOWERTAIL_VERSION=0.3.0
+docker compose pull server
+docker compose up -d
+```
+
 ## Reach the server
 
 Caddy serves the site `towertail.local`. To use this name on the host, add a line to `/etc/hosts` that points `towertail.local` to `127.0.0.1`. For a real domain, edit `caddy/Caddyfile`.
@@ -76,6 +88,8 @@ The server writes JSON logs to stdout. Each change to a node or to the settings 
 
 ## Upgrade
 
+If you build from the source:
+
 <Steps>
 1. Get the new source:
 
@@ -90,10 +104,14 @@ The server writes JSON logs to stdout. Each change to a node or to the settings 
     ```
 </Steps>
 
+If you use the published image, set `TOWERTAIL_VERSION` to the new version. Then run `docker compose pull server` and `docker compose up -d server`.
+
 ClickHouse migrations apply automatically when the server connects. Mac apps and samplers connect again automatically.
 
 ## Backup
 
 The server keeps nodes, tokens and settings in one BoltDB file, `config.db`, in the `server-data` volume. Copy this file while the server is stopped. If you lose this file, you lose the configuration, but not the metrics.
+
+The same volume has the `spill` folder. It keeps the batches that the server could not write to ClickHouse. Read [Configuration](/docs/self-host/configuration/#clickhouse).
 
 For settings, read [Configuration](/docs/self-host/configuration/).

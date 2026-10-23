@@ -41,12 +41,27 @@ log:
 | `TT_HTTP__CORS_ALLOW_ORIGINS` | `http.cors_allow_origins` | `*` | The allowed CORS origins. A variable sets one origin. For a list, use the YAML file. |
 | `TT_HTTP__RATE_LIMIT_RPS` | `http.rate_limit_rps` | `100` | Requests per second for each IP address, for all routes except `/v1/ingest`. |
 | `TT_HTTP__INGEST_RATE_LIMIT_RPS` | `http.ingest_rate_limit_rps` | `1000` | Requests per second for each IP address, for the sampler routes `/v1/ingest` and `/v1/control`. |
+| `TT_HTTP__CORS_ALLOW_CREDENTIALS` | `http.cors_allow_credentials` | `false` | When `true`, browsers can send cookies from the allowed origins. The server does not start with this setting and the origin `*`. |
+| `TT_HTTP__TRUSTED_PROXY_HEADER` | `http.trusted_proxy_header` | (empty) | The header that has the client IP address, for the rate limits and the logs. Empty means the address of the connection. Read [Client IP address](#client-ip-address). |
+
+### Client IP address
+
+Behind a proxy, all clients have the IP address of the proxy. Then they share one rate limit. To use the real client address, set `TT_HTTP__TRUSTED_PROXY_HEADER`:
+
+- `X-Forwarded-For` behind a proxy on a private address, for example the Caddy service of the Docker Compose stack. The compose file sets this value.
+- `CF-Connecting-IP` behind a Cloudflare Tunnel.
+
+<Aside type="caution">
+A client can set these headers. Set this value only when no client can reach the server without the proxy.
+</Aside>
 
 ## ClickHouse
 
 | Variable | YAML key | Default | Description |
 | --- | --- | --- | --- |
 | `TT_CLICKHOUSE__ADDR` | `clickhouse.addr` | `clickhouse:9000` | The ClickHouse address. |
+| (YAML only) | `clickhouse.addrs` | (empty) | A list of ClickHouse addresses. When you set it, the server does not use `clickhouse.addr`. |
+| `TT_CLICKHOUSE__SECURE` | `clickhouse.secure` | `false` | Connect to ClickHouse with TLS. |
 | `TT_CLICKHOUSE__DATABASE` | `clickhouse.database` | `towertail` | The database name. |
 | `TT_CLICKHOUSE__USER` | `clickhouse.user` | `towertail` | The user name. |
 | `TT_CLICKHOUSE__PASSWORD` | `clickhouse.password` | (empty) | The password. |
@@ -58,7 +73,28 @@ log:
 | `TT_CLICKHOUSE__BATCH_FLUSH_ROWS` | `clickhouse.batch_flush_rows` | `5000` | The server writes a batch when it has this number of rows. |
 | `TT_CLICKHOUSE__BATCH_FLUSH_BYTES` | `clickhouse.batch_flush_bytes` | `1048576` | The server writes a batch when it has this number of bytes. |
 | `TT_CLICKHOUSE__BATCH_FLUSH_PERIOD` | `clickhouse.batch_flush_period` | `1s` | The server writes a batch at least at this interval. |
+| `TT_CLICKHOUSE__SPILL_DIR` | `clickhouse.spill_dir` | `<storage.path>/spill` | The folder for batches that the server cannot write to ClickHouse. The server writes them to ClickHouse later. |
+| `TT_CLICKHOUSE__SPILL_MAX_BYTES` | `clickhouse.spill_max_bytes` | `1073741824` (1 GiB) | The maximum size of the spill folder. |
 | `TT_CLICKHOUSE__DISABLED` | `clickhouse.disabled` | `false` | For tests only. When `true`, the server does not keep metrics and has no history. |
+
+When a write to ClickHouse fails, the server tries again 3 times, after 1, 2 and 4 seconds. Then it keeps the batch in the spill folder. When a write to ClickHouse is good again, the server writes the oldest spill file. When the server queue is full, `POST /v1/ingest/samples` returns `503` with `Retry-After: 5`. Then the samplers send the samples again later.
+
+## Alert channels
+
+Users add alert channels (Slack, Discord, PagerDuty, webhook and email) with the API. For the routes, read the [server wire contract](https://github.com/towertail/towertail/blob/main/docs/wire.md). These settings apply to all channels:
+
+| Variable | YAML key | Default | Description |
+| --- | --- | --- | --- |
+| `TT_NOTIFY__BLOCK_PRIVATE_TARGETS` | `notify.block_private_targets` | `false` | When `true`, the server does not send alerts to loopback, private, link-local or CGNAT addresses. Set it when users that you do not trust can add channels. |
+| `TT_NOTIFY__SMTP__HOST` | `notify.smtp.host` | (empty) | The mail server for the email channel. When it is empty, the email channel is off. |
+| `TT_NOTIFY__SMTP__PORT` | `notify.smtp.port` | `587` | The port of the mail server. |
+| `TT_NOTIFY__SMTP__USER` | `notify.smtp.user` | (empty) | The user name for the mail server. |
+| `TT_NOTIFY__SMTP__PASSWORD` | `notify.smtp.password` | (empty) | The password for the mail server. |
+| `TT_NOTIFY__SMTP__PASSWORD_FILE` | `notify.smtp.password_file` | (empty) | A file that contains the password. The server reads it when the password is empty. |
+| `TT_NOTIFY__SMTP__FROM` | `notify.smtp.from` | (empty) | The sender address of the alert emails. |
+| `TT_NOTIFY__SMTP__TLS` | `notify.smtp.tls` | `starttls` | `starttls`, `tls` (port 465) or `none`. |
+
+The `/metrics` endpoint counts the alert sends in `towertail_notify_sends_total`. When the count with `result="error"` increases, a channel target is wrong or not available. The log line `alerter: notify` shows the error.
 
 ## Other settings
 

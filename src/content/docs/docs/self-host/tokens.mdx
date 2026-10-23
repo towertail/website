@@ -41,9 +41,35 @@ The command and the server use the same BoltDB file. While the server runs, it l
     docker compose run --rm server token issue --kind=user --label=me
     ```
 
-    The command prints the token on stdout.
+    The command writes one JSON log line, then the token on the last line. The token starts with `tt_`.
 
 4. Start the server again:
+
+    ```sh
+    docker compose start server
+    ```
+</Steps>
+
+## Log in with a password
+
+Clients can also log in with an email address and a password (`POST /v1/auth/login`). To make a user, use the `towertail-server user create` command. Give the password on stdin. The password must have 12 characters or more.
+
+<Steps>
+1. Stop the server:
+
+    ```sh
+    docker compose stop server
+    ```
+
+2. Make the user:
+
+    ```sh
+    echo 'your long password' | docker compose run --rm -T server user create --email=ops@example.com
+    ```
+
+    To set a new password for a user, run the same command again.
+
+3. Start the server again:
 
     ```sh
     docker compose start server
@@ -70,6 +96,8 @@ curl -X POST https://towertail.example.com/v1/sampler/enroll \
 The response contains `node_id` and `sampler_token`. Use the sampler token with [the sampler service](/docs/sampler/service-install/).
 
 To make a sampler token for a node that exists, use the command line with `--kind=sampler --node-id=<uuid>`.
+
+To see the sampler tokens, send `GET /v1/sampler/tokens` with a user or admin token. The server never shows a token again, so the list shows only the ID, the label, the node and the creation time of each token. To revoke a token, send `DELETE /v1/sampler/tokens/<id>`. The server then refuses samples with this token.
 
 ## Connect the Mac app
 

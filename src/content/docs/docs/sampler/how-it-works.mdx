@@ -41,6 +41,20 @@ Without root, the sampler sees less data on some hosts:
 
 All the other metrics work without root.
 
+## Disk scans
+
+The **Usage** view of a server shows which folders use the disk space. To open it, open the full view, select **DISK**, then select **Usage**.
+
+For a scan, Towertail runs `~/.towertail/towertail-sampler scan` over SSH. Before a scan, Towertail copies a new sampler to the server if the sampler on the server is old.
+
+- The scan reads the names and sizes of files and folders. It does not read the contents of files.
+- The scan does not delete or change files.
+- The scan runs at a low CPU and disk priority. A scan of a large disk can take one minute or more.
+
+Towertail shows items that you can remove, for example caches and logs. When you select items and click **Copy script**, Towertail copies a cleanup script. Towertail never runs this script. You paste it into a terminal on the server.
+
+When the Mac app uses a [self-hosted server](/docs/self-host/quick-start/), the sampler service on the host does the scan. Read [Allow disk scans](/docs/sampler/service-install/#allow-disk-scans).
+
 ## Supported platforms
 
 Towertail for Mac monitors these hosts over SSH:

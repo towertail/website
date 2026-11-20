@@ -2,7 +2,7 @@
 import Base from "../layouts/Base.astro";
 import Popover from "../components/Popover.astro";
 import InstallCommand from "../components/InstallCommand.astro";
-import CloudWaitlist from "../components/CloudWaitlist.astro";
+import CloudPlans from "../components/CloudPlans.astro";
 import { buildReleases } from "../lib/releases";
 import { BREW_CMD, DOWNLOAD_URL, GITHUB_URL, MIN_MACOS, WINDOWS_BUILD_URL } from "../config/site";
 
@@ -126,7 +126,7 @@ const steps = [
   </section>
 
   <section class="block" id="cloud">
-    <div class="wrap"><CloudWaitlist /></div>
+    <div class="wrap"><CloudPlans /></div>
   </section>
 
   <section class="block">

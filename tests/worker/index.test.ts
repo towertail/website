@@ -27,6 +27,13 @@ describe("worker routes", () => {
     expect(await res.text()).toContain("404");
   });
 
+  it("redirects /install.sh to the release", async () => {
+    const res = await get("https://towertail.com/install.sh");
+    expect(res.status).toBe(302);
+    expect(res.headers.get("location")).toBe("https://github.com/towertail/sampler/releases/latest/download/install.sh");
+    expect(res.headers.get("cache-control")).toBe("max-age=300");
+  });
+
   it("redirects www to the apex with 301", async () => {
     const res = await get("https://www.towertail.com/docs/?q=1");
     expect(res.status).toBe(301);

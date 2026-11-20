@@ -24,17 +24,27 @@ test.describe("home page", () => {
     expect(await page.evaluate(() => navigator.clipboard.readText())).toBe(BREW);
   });
 
-  test("the waitlist form signs up with the Turnstile test key", async ({ page }, info) => {
-    // One project is enough, and the Worker allows only 5 sign-ups per minute.
-    test.skip(info.project.name !== "desktop-dark", "runs in desktop-dark only");
+  test("cloud section shows three plans", async ({ page }) => {
     await page.goto("/#cloud");
-    await page.getByLabel("Email").fill(`e2e-${Date.now()}@example.com`);
-    await page.waitForFunction(() => {
-      const input = document.querySelector<HTMLInputElement>('[name="cf-turnstile-response"]');
-      return !!input?.value;
-    }, undefined, { timeout: 20_000 });
-    await page.getByRole("button", { name: "Join the waitlist" }).click();
-    await expect(page.getByText("You are on the list.")).toBeVisible();
+    const cloud = page.locator("#cloud");
+    for (const [name, price] of [["Free", "$0"], ["Solo", "$5"], ["Team", "$10"]]) {
+      await expect(cloud.getByRole("heading", { name, exact: true })).toBeVisible();
+      await expect(cloud.getByText(price, { exact: true })).toBeVisible();
+    }
+    await expect(cloud.getByText("planned")).toHaveCount(0);
+  });
+
+  test("cloud section has no waitlist form", async ({ page }) => {
+    await page.goto("/");
+    await expect(page.locator("form[data-wl]")).toHaveCount(0);
+  });
+
+  test("sign in from the app", async ({ page }) => {
+    await page.goto("/#cloud");
+    const cloud = page.locator("#cloud");
+    await expect(cloud.getByText("Open Towertail, then choose Turn on 24/7 monitoring.")).toBeVisible();
+    await expect(cloud.getByRole("link", { name: "Download" })).toHaveAttribute("href", DOWNLOAD);
+    await expect(cloud.getByRole("link", { name: "Open the dashboard" })).toHaveAttribute("href", "https://app.towertail.com");
   });
 });
 

@@ -1,3 +1,4 @@
+import { INSTALL_SH_URL } from "../config/site";
 import { WaitlistHandler } from "./waitlist";
 
 const APEX = "towertail.com";
@@ -8,6 +9,9 @@ export default {
     if (url.hostname === `www.${APEX}`) {
       url.hostname = APEX;
       return Response.redirect(url.toString(), 301);
+    }
+    if (url.pathname === "/install.sh" && req.method === "GET") {
+      return new Response(null, { status: 302, headers: { location: INSTALL_SH_URL, "cache-control": "max-age=300" } });
     }
     if (url.pathname.startsWith("/api/")) return api(req, env, url);
     return env.ASSETS.fetch(req);

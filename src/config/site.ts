@@ -13,6 +13,8 @@ export const WINDOWS_BUILD_URL = `${GITHUB_URL}/tree/main/apps/windows#readme`;
 export const TRADEMARK_URL = `${SITE_REPO_URL}/blob/main/TRADEMARK.md`;
 
 export const DOWNLOAD_URL = `${RELEASES_URL}/latest/download/Towertail.zip`;
+export const INSTALL_SH_URL = `${GITHUB_ORG}/sampler/releases/latest/download/install.sh`;
+export const CLOUD_APP_URL = "https://app.towertail.com";
 export const BREW_CMD = "brew install --cask towertail/tap/towertail";
 export const MIN_MACOS = "macOS 14";
 
@@ -22,3 +24,31 @@ export const NAV = [
   { href: "/changelog/", label: "Changelog" },
   { href: GITHUB_URL, label: "GitHub" },
 ];
+
+export const PLANS = [
+  {
+    id: "free",
+    name: "Free",
+    price: "$0",
+    unit: "",
+    note: "No card.",
+    items: ["3 hosts", "1 user", "1 day of history", "Email alerts"],
+  },
+  {
+    id: "solo",
+    name: "Solo",
+    price: "$5",
+    unit: "/mo",
+    note: "Or $50/yr.",
+    items: ["25 hosts", "1 user", "30 days of history", "Phone push", "+$5 for each 25 more hosts, up to 100"],
+  },
+  {
+    id: "team",
+    name: "Team",
+    price: "$10",
+    unit: "/user/mo",
+    note: "Minimum 3 users ($30).",
+    items: ["100 hosts, then $1/host", "1 year of history", "Escalation and roles", "Slack and webhooks", "SMS budget of $2/mo"],
+  },
+];
+export const PLANS_COMMON = "Read-only API and MCP on all plans.";

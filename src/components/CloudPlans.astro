@@ -1,0 +1,141 @@
+---
+import { CLOUD_APP_URL, DOWNLOAD_URL, PLANS, PLANS_COMMON } from "../config/site";
+---
+
+<div class="cloud">
+  <div class="head">
+    <span class="label">Towertail Cloud</span>
+    <h2>Alerts when your laptop sleeps.</h2>
+    <p class="sub">The app watches your servers while your Mac is awake. Towertail Cloud watches them all the time.</p>
+  </div>
+  <div class="plans">
+    {
+      PLANS.map((p) => (
+        <article class="plan" aria-labelledby={`plan-${p.id}`}>
+          <h3 id={`plan-${p.id}`}>{p.name}</h3>
+          <p class="price">
+            <b>{p.price}</b>
+            {p.unit && <span>{p.unit}</span>}
+          </p>
+          <p class="fine">{p.note}</p>
+          <ul>{p.items.map((i) => <li>{i}</li>)}</ul>
+        </article>
+      ))
+    }
+  </div>
+  <p class="common">{PLANS_COMMON}</p>
+  <div class="act">
+    <div class="start">
+      <h3>Sign in from the app</h3>
+      <p>Open Towertail, then choose Turn on 24/7 monitoring. A new account starts on Free. No card.</p>
+    </div>
+    <div class="ctas">
+      <a class="btn primary" href={DOWNLOAD_URL}>Download</a>
+      <a class="btn ghost" href={CLOUD_APP_URL}>Open the dashboard</a>
+    </div>
+  </div>
+</div>
+
+<style>
+  .cloud {
+    display: flex;
+    flex-direction: column;
+    gap: 24px;
+    background: var(--tt-panel);
+    border: 1px solid var(--tt-line);
+    border-radius: 16px;
+    padding: clamp(20px, 4vw, 40px);
+  }
+  h2 {
+    font-size: clamp(26px, 3.4vw, 34px);
+    letter-spacing: -0.02em;
+    margin: 10px 0 12px;
+  }
+  .sub {
+    margin: 0;
+  }
+  .plans {
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 16px;
+  }
+  .plan {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    background: var(--tt-cell);
+    border: 1px solid var(--tt-line);
+    border-radius: 12px;
+    padding: 20px;
+  }
+  .plan h3 {
+    margin: 0;
+    font-size: 16px;
+  }
+  .price {
+    margin: 0;
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+    color: var(--tt-muted);
+  }
+  .price b {
+    font-size: 30px;
+    letter-spacing: -0.02em;
+    color: var(--tt-fg);
+  }
+  .fine {
+    margin: 0 0 8px;
+  }
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    color: var(--tt-muted);
+    font-size: 15px;
+  }
+  li {
+    display: flex;
+    gap: 10px;
+    align-items: baseline;
+  }
+  li::before {
+    content: "→";
+    color: var(--tt-ok);
+    font-family: var(--tt-font-mono);
+  }
+  .common {
+    margin: 0;
+    color: var(--tt-muted);
+  }
+  .act {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px 24px;
+    border-top: 1px solid var(--tt-line);
+    padding-top: 24px;
+  }
+  .start h3 {
+    margin: 0 0 4px;
+    font-size: 16px;
+  }
+  .start p {
+    margin: 0;
+    color: var(--tt-muted);
+  }
+  .ctas {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 820px) {
+    .plans {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>

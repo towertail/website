@@ -57,6 +57,10 @@ export default defineConfig({
           items: ["docs/sampler/how-it-works", "docs/sampler/service-install"],
         },
         {
+          label: "Cloud",
+          items: ["docs/cloud/api", "docs/cloud/mcp"],
+        },
+        {
           label: "Self-host",
           items: ["docs/self-host/quick-start", "docs/self-host/tokens", "docs/self-host/configuration"],
         },

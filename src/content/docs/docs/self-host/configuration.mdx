@@ -41,6 +41,8 @@ log:
 | `TT_HTTP__CORS_ALLOW_ORIGINS` | `http.cors_allow_origins` | `*` | The allowed CORS origins. A variable sets one origin. For a list, use the YAML file. |
 | `TT_HTTP__RATE_LIMIT_RPS` | `http.rate_limit_rps` | `100` | Requests per second for each IP address, for all routes except `/v1/ingest`. |
 | `TT_HTTP__INGEST_RATE_LIMIT_RPS` | `http.ingest_rate_limit_rps` | `1000` | Requests per second for each IP address, for the sampler routes `/v1/ingest` and `/v1/control`. |
+| `TT_HTTP__API_KEY_RATE_LIMIT_RPS` | `http.api_key_rate_limit_rps` | `5` | Requests per second for each API key, on top of the limit for each IP address. |
+| `TT_HTTP__API_KEY_RATE_LIMIT_BURST` | `http.api_key_rate_limit_burst` | `20` | The burst size for each API key. |
 | `TT_HTTP__CORS_ALLOW_CREDENTIALS` | `http.cors_allow_credentials` | `false` | When `true`, browsers can send cookies from the allowed origins. The server does not start with this setting and the origin `*`. |
 | `TT_HTTP__TRUSTED_PROXY_HEADER` | `http.trusted_proxy_header` | (empty) | The header that has the client IP address, for the rate limits and the logs. Empty means the address of the connection. Read [Client IP address](#client-ip-address). |
 
@@ -105,4 +107,5 @@ The `/metrics` endpoint counts the alert sends in `towertail_notify_sends_total`
 | `TT_AUTH__BOOTSTRAP_TOKEN` | `auth.bootstrap_token` | (empty) | An admin token that the server adds at the start. Read [Tokens](/docs/self-host/tokens/#bootstrap-token). |
 | `TT_LOG__LEVEL` | `log.level` | `info` | `debug`, `info`, `warn` or `error`. |
 | `TT_LOG__FORMAT` | `log.format` | `json` | `json` or `text`. |
+| `TT_MCP__ENABLED` | `mcp.enabled` | `true` | When `false`, the server has no MCP endpoint, and `/mcp` gives 404. |
 | `TT_CLOUD__MANAGED` | `cloud.managed` | `false` | Keep `false` for a self-hosted server. |

@@ -14,6 +14,7 @@ Each client sends a bearer token to the server. A token starts with `tt_`. The s
 | `user` | The Mac app | The API, but not ingest and not control. |
 | `admin` | Administrators | All that `user` can do, and token management. |
 | `sampler` | One sampler in push mode | Ingest and control for one node only. |
+| `api` | Scripts and AI tools | Read-only API and MCP. |
 
 ## Issue a token
 
@@ -21,7 +22,7 @@ Use the `towertail-server token issue` command:
 
 | Option | Description |
 | --- | --- |
-| `--kind` | Required. `user`, `admin` or `sampler`. |
+| `--kind` | Required. `user`, `admin`, `sampler` or `api`. |
 | `--label` | A name for the token, for example the name of a person or a host. |
 | `--node-id` | The UUID of the node. Use it for sampler tokens. |
 

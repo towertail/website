@@ -15,6 +15,8 @@ export const TRADEMARK_URL = `${SITE_REPO_URL}/blob/main/TRADEMARK.md`;
 export const DOWNLOAD_URL = `${RELEASES_URL}/latest/download/Towertail.zip`;
 export const INSTALL_SH_URL = `${GITHUB_ORG}/sampler/releases/latest/download/install.sh`;
 export const CLOUD_APP_URL = "https://app.towertail.com";
+export const API_URL = "https://api.towertail.com";
+export const MCP_URL = `${API_URL}/mcp`;
 export const BREW_CMD = "brew install --cask towertail/tap/towertail";
 export const MIN_MACOS = "macOS 14";
 

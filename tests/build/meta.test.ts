@@ -6,7 +6,7 @@ const dist = new URL("../../dist/", import.meta.url);
 const read = (path: string) => readFileSync(new URL(path, dist), "utf8");
 
 describe.skipIf(!existsSync(dist))("built pages", () => {
-  it.each(["index.html", "docs/install/index.html", "changelog/index.html"])("%s has the SEO tags", (file) => {
+  it.each(["index.html", "docs/install/index.html", "docs/cloud/api/index.html", "docs/cloud/mcp/index.html", "changelog/index.html"])("%s has the SEO tags", (file) => {
     const doc = parse(read(file));
     const meta = (sel: string) => doc.querySelector(sel)?.getAttribute("content");
     expect(doc.querySelector("title")?.text.trim()).toBeTruthy();

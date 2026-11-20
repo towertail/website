@@ -1,0 +1,77 @@
+---
+title: MCP server
+description: Connect Claude Code to Towertail Cloud with the read-only MCP server and ask questions about your hosts, metrics, processes, disks and alerts.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import { CLOUD_APP_URL } from '../../../../config/site';
+
+The Towertail MCP server lets an AI assistant read your fleet data. It uses the [Model Context Protocol](https://modelcontextprotocol.io). The assistant calls six tools to list hosts, read metrics, find the top processes, check disks, list alerts and compare two periods.
+
+The server is read-only. No tool changes a host or a setting. All plans include it.
+
+The URL of the cloud server is:
+
+```
+https://api.towertail.com/mcp
+```
+
+A self-hosted server has the same endpoint at `/mcp`.
+
+## Connect Claude Code
+
+1. Make an API key on the <a href={`${CLOUD_APP_URL}/api-keys`}>API keys page</a>. Read [API keys and the API](/docs/cloud/api/).
+2. Add the server to Claude Code. Use your key in the header:
+
+   ```sh
+   claude mcp add --transport http towertail https://api.towertail.com/mcp \
+     --header "Authorization: Bearer tt_your_key"
+   ```
+
+3. Run `claude mcp list` to make sure that `towertail` is connected.
+4. Ask a question. Claude picks the tools.
+
+Other MCP clients that can send a static header work in the same way. Send `POST` requests with the header `Authorization: Bearer tt_...`.
+
+<Aside type="caution" title="claude.ai and Claude Desktop">
+The custom connectors in claude.ai and Claude Desktop sign in with OAuth. The Towertail MCP server does not support OAuth yet. It comes later. Until then, use an MCP client that sends a static header, for example Claude Code.
+</Aside>
+
+## Example questions
+
+- Which host used the most CPU in the last hour?
+- Compare memory today with yesterday.
+- Which disks fill up?
+- Show the open alerts.
+
+## Tools
+
+A tool takes a host by ID or by name. A name that matches two hosts gives an error with the two IDs. `range` is a duration from `15m` to `365d`, for example `1h`, `90m` or `7d`.
+
+| Tool | What it does | Input |
+| --- | --- | --- |
+| `list_hosts` | Lists the hosts with the online state, the last seen time, CPU, memory, disk, load and network. | `sort` (`cpu`, `mem`, `disk` or `net`), `limit` (1 to 200; default 50) |
+| `host_metrics` | Gives the history of metrics of one host: min, avg, max, last and at most 300 points for each metric. | `host`, `metrics` (`cpu`, `mem`, `net_rx`, `net_tx`, `disk_read`, `disk_write`; default `cpu`), `range` (default `1h`) or `from` and `to` (RFC 3339), `resolution` (`auto`, `raw`, `1m`, `5m` or `1h`) |
+| `top_processes` | Gives the top processes of one host or of the fleet. | `host` (empty means the fleet), `by` (`cpu` or `mem`), `range` (default `1h`), `limit` (1 to 50; default 20) |
+| `alerts` | Lists the open alerts, or the recent alerts. | `state` (`open` or `recent`), `days` (1 to 90; default 7), `host` |
+| `disks` | Gives the use of each mount of one host, and the change in the range. | `host`, `range` (default `24h`) |
+| `compare` | Compares a metric in the last window with the window before it, for each host. | `metric` (default `cpu`), `window` (`15m` to `30d`; default `1h`), `host` (empty means all hosts) |
+
+CPU values are percents. Memory and disk values are ratios from 0 to 1. Network and disk I/O values are bytes each second.
+
+## History limit
+
+Each plan sets how far back the tools can read. When a request asks for older data, the tool moves the start of the range and sets `clamped` to `true` in the reply.
+
+| Plan | History |
+| --- | --- |
+| Free | 1 day |
+| Solo | 30 days |
+| Team | 1 year |
+
+## Limits
+
+- Each API key has a budget of 5 requests each second, with a burst of 20. A request above the budget gets `429`. Read [API keys and the API](/docs/cloud/api/#rate-limit).
+- `host_metrics` gives at most 300 points for each metric. For a long range, the server raises the step.
+- `compare` lists the 50 hosts with the biggest change.
+- A self-hosted server can turn the MCP server off with `TT_MCP__ENABLED=false`. Read [Configuration](/docs/self-host/configuration/).

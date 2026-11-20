@@ -1,0 +1,129 @@
+---
+title: API keys and the API
+description: Make a read-only API key for Towertail Cloud and read the fleet data of your org from scripts.
+---
+
+import { Aside } from '@astrojs/starlight/components';
+import { CLOUD_APP_URL } from '../../../../config/site';
+
+An API key lets a script or a tool read the data of your org. The key is read-only: it cannot change anything. All plans include API keys.
+
+## Make a key
+
+1. Open the <a href={`${CLOUD_APP_URL}/api-keys`}>API keys page</a> in the dashboard.
+2. Type a label, for example `grafana`, and select **Create key**.
+3. Copy the key. It starts with `tt_`. The page shows the key one time only.
+
+To revoke a key, select **Revoke** on the same page. The tools that use the key stop at once.
+
+On a self-hosted server, use `POST /v1/api-keys` with a user token, or run `towertail-server token issue --kind=api`. Read [Tokens](/docs/self-host/tokens/).
+
+## Send a request
+
+Send the key as a bearer token. The base address of the cloud is `https://api.towertail.com`. All examples below use the shell variable `TT_API_KEY`:
+
+```sh
+export TT_API_KEY=tt_your_key
+curl -sS https://api.towertail.com/v1/nodes \
+  -H "Authorization: Bearer $TT_API_KEY"
+```
+
+## Read-only rule
+
+A key has the `viewer` role. It can use the read endpoints that this page lists, and the other `GET` routes that a viewer can read. It cannot do these things:
+
+- Change a host, a setting, a channel or a member.
+- Acknowledge or snooze an alert, or start a disk scan.
+- Open the live stream.
+- Make or list API keys.
+
+A request that the key cannot do gets `403`.
+
+## Rate limit
+
+Each key has its own budget: 5 requests each second, with a burst of 20. A request above the budget gets `429` with the code `rate_limited`. The `Retry-After` header gives the seconds to wait. The limit for each IP address also applies. A self-hosted server sets the budget with `TT_HTTP__API_KEY_RATE_LIMIT_RPS` and `TT_HTTP__API_KEY_RATE_LIMIT_BURST`. Read [Configuration](/docs/self-host/configuration/).
+
+## Plan history limit
+
+The plan of your org sets how far back a key can read:
+
+| Plan | History |
+| --- | --- |
+| Free | 1 day |
+| Solo | 30 days |
+| Team | 1 year |
+
+When a request asks for older data, the server moves the start of the range to the oldest time that the plan allows. The reply then has `"clamped": true`. The same limit applies to the dashboard and to the [MCP server](/docs/cloud/mcp/).
+
+## Endpoints
+
+Time values are RFC 3339, or `now` and `now-1h`. Replies are JSON.
+
+### List the hosts
+
+`GET /v1/fleet/hosts` gives each host with its latest values, the highest first. Parameters: `sort` (`cpu`, `mem`, `disk` or `net`; default `cpu`) and `limit` (1 to 500; default 100). A host with no sample in the last 10 minutes is offline and has no values.
+
+```sh
+curl -sS "https://api.towertail.com/v1/fleet/hosts?sort=mem&limit=10" \
+  -H "Authorization: Bearer $TT_API_KEY"
+```
+
+`cpu` is a percent. `mem` and `disk` are ratios from 0 to 1. `net_rx` and `net_tx` are bytes each second.
+
+### Top processes
+
+`GET /v1/fleet/processes` gives the top processes of the fleet, or of one host. Parameters: `by` (`cpu` or `mem`; default `cpu`), `node` (a host ID; default all hosts), `limit` (1 to 50; default 20), `from` and `to` (default the last hour).
+
+```sh
+curl -sS "https://api.towertail.com/v1/fleet/processes?by=cpu&limit=5&from=now-6h" \
+  -H "Authorization: Bearer $TT_API_KEY"
+```
+
+### Compare two windows
+
+`GET /v1/fleet/compare` compares a metric in the last window with the window before it. Parameters: `metric` (`cpu`, `mem`, `net_rx`, `net_tx`, `disk_read` or `disk_write`; default `cpu`), `window` (a duration from `15m` to `720h`; default `1h`) and `node` (default all hosts). The hosts with the biggest change are first.
+
+```sh
+curl -sS "https://api.towertail.com/v1/fleet/compare?metric=mem&window=24h" \
+  -H "Authorization: Bearer $TT_API_KEY"
+```
+
+### History of many hosts
+
+`GET /v1/history` gives the history of up to 8 metrics of up to 200 hosts. The range is 24 hours at most. Parameters: `nodes` and `metrics` (lists with commas), `from`, `to` and `step` (default `1m`).
+
+```sh
+curl -sS "https://api.towertail.com/v1/history?nodes=$NODE_ID&metrics=cpu,mem&from=now-2h" \
+  -H "Authorization: Bearer $TT_API_KEY"
+```
+
+### History of one host
+
+`GET /v1/nodes/{id}/history` gives one metric (`metric`) or a list (`metrics`) of one host. The parameters `from`, `to` and `step` are the same. The default range is 1 hour.
+
+```sh
+curl -sS "https://api.towertail.com/v1/nodes/$NODE_ID/history?metric=cpu&from=now-7d&step=1h" \
+  -H "Authorization: Bearer $TT_API_KEY"
+```
+
+### Disks
+
+`GET /v1/nodes/{id}/disks` gives the use of each mount of a host. The default range is 24 hours.
+
+```sh
+curl -sS "https://api.towertail.com/v1/nodes/$NODE_ID/disks?from=now-7d" \
+  -H "Authorization: Bearer $TT_API_KEY"
+```
+
+### Alerts
+
+`GET /v1/alerts` gives the open alerts. `GET /v1/alerts/recent` gives the alert events of the last `days` days (1 to 90; default 7).
+
+```sh
+curl -sS "https://api.towertail.com/v1/alerts/recent?days=3" \
+  -H "Authorization: Bearer $TT_API_KEY"
+```
+
+<Aside>
+For all routes and all fields, read the [server wire contract](https://github.com/towertail/towertail/blob/main/docs/wire.md).
+</Aside>

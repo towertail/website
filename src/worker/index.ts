@@ -1,5 +1,4 @@
 import { INSTALL_SH_URL } from "../config/site";
-import { WaitlistHandler } from "./waitlist";
 
 const APEX = "towertail.com";
 
@@ -13,22 +12,12 @@ export default {
     if (url.pathname === "/install.sh" && req.method === "GET") {
       return new Response(null, { status: 302, headers: { location: INSTALL_SH_URL, "cache-control": "max-age=300" } });
     }
-    if (url.pathname.startsWith("/api/")) return api(req, env, url);
+    if (url.pathname.startsWith("/api/")) return api(url);
     return env.ASSETS.fetch(req);
   },
 } satisfies ExportedHandler<Env>;
 
-async function api(req: Request, env: Env, url: URL): Promise<Response> {
-  switch (url.pathname) {
-    case "/api/health":
-      return Response.json({ ok: true });
-    case "/api/waitlist": {
-      const ip = req.headers.get("cf-connecting-ip") ?? "unknown";
-      const { success } = await env.WAITLIST_LIMIT.limit({ key: ip });
-      if (!success) return Response.json({ error: "Too many requests. Try again in a minute." }, { status: 429 });
-      return new WaitlistHandler(env.DB, env.TURNSTILE_SECRET).handle(req);
-    }
-    default:
-      return Response.json({ error: "not found" }, { status: 404 });
-  }
+function api(url: URL): Response {
+  if (url.pathname === "/api/health") return Response.json({ ok: true });
+  return Response.json({ error: "not found" }, { status: 404 });
 }

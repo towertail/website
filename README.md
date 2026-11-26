@@ -1,6 +1,6 @@
 # towertail.com
 
-The source of [towertail.com](https://towertail.com): the landing page, the docs (`/docs`), the changelog and the Towertail Cloud waitlist.
+The source of [towertail.com](https://towertail.com): the landing page, the docs (`/docs`), and the changelog.
 
 The site uses [Astro](https://astro.build) and [Starlight](https://starlight.astro.build). One Cloudflare Worker serves the static build and the `/api/*` routes.
 
@@ -14,8 +14,6 @@ pnpm dev              # Astro dev server on http://localhost:4321
 pnpm build            # static build to dist/
 pnpm wrangler dev     # the Worker and the build, on http://localhost:8787
 ```
-
-For `wrangler dev`, copy `.dev.vars.example` to `.dev.vars`. The example has the Turnstile test secret.
 
 The build reads GitHub Releases for the changelog. Set `GITHUB_TOKEN` to avoid the rate limit.
 

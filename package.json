@@ -14,7 +14,7 @@
     "test": "vitest run --project unit --project worker",
     "test:build": "vitest run --project build",
     "test:e2e": "playwright test",
-    "cf-typegen": "wrangler types src/worker/worker-configuration.d.ts --env-file .dev.vars.example"
+    "cf-typegen": "wrangler types src/worker/worker-configuration.d.ts"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.6",

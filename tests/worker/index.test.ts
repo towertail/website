@@ -1,7 +1,7 @@
 import { exports } from "cloudflare:workers";
 import { describe, expect, it } from "vitest";
 
-const get = (url: string) => exports.default.fetch(new Request(url, { redirect: "manual" }));
+const get = (url: string, init?: RequestInit) => exports.default.fetch(new Request(url, { redirect: "manual", ...init }));
 
 describe("worker routes", () => {
   it("returns 200 on /api/health", async () => {
@@ -10,9 +10,10 @@ describe("worker routes", () => {
     expect(await res.json()).toEqual({ ok: true });
   });
 
-  it("returns 404 JSON on an unknown API path", async () => {
-    const res = await get("https://towertail.com/api/nope");
+  it("returns 404 JSON on an unknown API path such as the retired /api/waitlist", async () => {
+    const res = await get("https://towertail.com/api/waitlist", { method: "POST" });
     expect(res.status).toBe(404);
+    expect(await res.json()).toEqual({ error: "not found" });
   });
 
   it("serves the static home page", async () => {

@@ -30,7 +30,7 @@ jobs:
         with:
           args: >-
             --no-progress --root-dir "${{ github.workspace }}/dist"
-            --exclude '^https://towertail\.com' --exclude '/edit/main/' --exclude '/api/waitlist$' --exclude '/compare/'
+            --exclude '^https://towertail\.com' --exclude '/edit/main/' --exclude '/compare/'
             --max-retries 3 --accept 200,429
             'dist/**/*.html'
           fail: true

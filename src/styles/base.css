@@ -29,9 +29,6 @@ svg {
   margin: 0 auto;
   padding-inline: 16px;
 }
-.mono {
-  font-family: var(--tt-font-mono);
-}
 .label {
   font: 500 11px/1 var(--tt-font-mono);
   letter-spacing: 0.14em;

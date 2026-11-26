@@ -7,3 +7,4 @@ test-results/
 playwright-report/
 .lighthouseci/
 .env
+src/worker/worker-configuration.d.ts

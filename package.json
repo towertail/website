@@ -10,11 +10,11 @@
     "dev": "astro dev",
     "build": "astro build",
     "preview": "wrangler dev",
-    "check": "astro check && tsc -p tsconfig.worker.json",
+    "check": "pnpm cf-typegen && astro check && tsc -p tsconfig.worker.json",
     "test": "vitest run --project unit --project worker",
     "test:build": "vitest run --project build",
     "test:e2e": "playwright test",
-    "cf-typegen": "wrangler types src/worker/worker-configuration.d.ts"
+    "cf-typegen": "wrangler types src/worker/worker-configuration.d.ts --env-file .dev.vars.example"
   },
   "dependencies": {
     "@astrojs/starlight": "^0.42.6",

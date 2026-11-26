@@ -1,10 +1,11 @@
 ---
 // Values are 0-100. The SVG is 60x18.
 export type Tint = "ok" | "warn" | "crit";
+export type Kind = "line" | "area" | "bars";
 
 interface Props {
   values: number[];
-  kind?: "line" | "area" | "bars";
+  kind?: Kind;
   tint?: Tint;
 }
 const { values, kind = "line", tint = "ok" } = Astro.props;

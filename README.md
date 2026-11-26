@@ -22,7 +22,7 @@ The build reads GitHub Releases for the changelog. Set `GITHUB_TOKEN` to avoid t
 ## Test
 
 ```sh
-pnpm check            # astro check (types)
+pnpm check            # Worker types, astro check and tsc
 pnpm test             # unit and Worker tests (Vitest)
 pnpm test:build       # tests on dist/ (run after pnpm build)
 pnpm test:e2e         # Playwright (starts wrangler dev)

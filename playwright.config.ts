@@ -11,9 +11,7 @@ export default defineConfig({
   use: { baseURL: `http://localhost:${PORT}` },
   projects: [
     { name: "desktop-dark", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 }, colorScheme: "dark" } },
-    { name: "desktop-light", use: { ...devices["Desktop Chrome"], viewport: { width: 1280, height: 800 }, colorScheme: "light" } },
     { name: "mobile-dark", use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 }, colorScheme: "dark" } },
-    { name: "mobile-light", use: { ...devices["Desktop Chrome"], viewport: { width: 390, height: 844 }, colorScheme: "light" } },
   ],
   // Serve dist/ through the Worker. Run `pnpm build` first.
   webServer: {

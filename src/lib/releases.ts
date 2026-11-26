@@ -1,4 +1,6 @@
-export type Channel = "app" | "server";
+import { GITHUB_REPO } from "../config/site";
+
+type Channel = "app" | "server";
 
 export interface Release {
   channel: Channel;
@@ -67,6 +69,6 @@ export class ReleaseFeed {
 // One fetch for each build, shared by all pages.
 let cached: Promise<Release[]> | undefined;
 export function buildReleases(): Promise<Release[]> {
-  cached ??= new ReleaseFeed("towertail/towertail", process.env.GITHUB_TOKEN).list();
+  cached ??= new ReleaseFeed(GITHUB_REPO, process.env.GITHUB_TOKEN).list();
   return cached;
 }

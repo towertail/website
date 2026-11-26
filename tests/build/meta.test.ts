@@ -6,7 +6,7 @@ const dist = new URL("../../dist/", import.meta.url);
 const read = (path: string) => readFileSync(new URL(path, dist), "utf8");
 
 describe.skipIf(!existsSync(dist))("built pages", () => {
-  it.each(["index.html", "docs/install/index.html", "docs/cloud/api/index.html", "docs/cloud/mcp/index.html", "changelog/index.html"])("%s has the SEO tags", (file) => {
+  it.each(["index.html", "docs/install/index.html", "docs/cloud/api/index.html", "docs/cloud/mcp/index.html", "changelog/index.html"])("%s has the SEO tags and the shared head tags", (file) => {
     const doc = parse(read(file));
     const meta = (sel: string) => doc.querySelector(sel)?.getAttribute("content");
     expect(doc.querySelector("title")?.text.trim()).toBeTruthy();
@@ -14,6 +14,9 @@ describe.skipIf(!existsSync(dist))("built pages", () => {
     expect(doc.querySelector('link[rel="canonical"]')?.getAttribute("href")).toMatch(/^https:\/\/towertail\.com\//);
     expect(meta('meta[property="og:image"]')).toBe("https://towertail.com/og/default.png");
     expect(meta('meta[name="twitter:card"]')).toBe("summary_large_image");
+    expect(meta('meta[name="twitter:image"]')).toBe("https://towertail.com/og/default.png");
+    expect(doc.querySelector('link[rel="apple-touch-icon"]')).toBeTruthy();
+    if (!process.env.PUBLIC_CF_BEACON_TOKEN) expect(read(file)).not.toContain("cloudflareinsights");
   });
 
   it("lists /, /docs/ and /changelog/ in the sitemap", () => {
@@ -23,12 +26,6 @@ describe.skipIf(!existsSync(dist))("built pages", () => {
     for (const u of ["https://towertail.com/", "https://towertail.com/docs/", "https://towertail.com/changelog/"]) {
       expect(urls).toContain(`<loc>${u}</loc>`);
     }
-  });
-
-  it("leaves out the analytics beacon when the token is not set", () => {
-    if (process.env.PUBLIC_CF_BEACON_TOKEN) return;
-    expect(read("index.html")).not.toContain("cloudflareinsights");
-    expect(read("docs/install/index.html")).not.toContain("cloudflareinsights");
   });
 
   it("has the icons, the manifest and robots.txt", () => {

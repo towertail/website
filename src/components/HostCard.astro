@@ -1,11 +1,11 @@
 ---
-import Sparkline, { type Tint } from "./Sparkline.astro";
+import Sparkline, { type Kind, type Tint } from "./Sparkline.astro";
 
-export interface Metric {
+interface Metric {
   key: "CPU" | "MEM" | "DISK" | "NET";
   value: string;
   tint?: Tint;
-  kind?: "line" | "area" | "bars";
+  kind?: Kind;
   values: number[];
 }
 

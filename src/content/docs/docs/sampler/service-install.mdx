@@ -1,27 +1,24 @@
 ---
-title: Install the sampler as a service
-description: Run the sampler as a systemd or launchd service that sends samples to a self-hosted Towertail server.
+title: Run the sampler in the background
+description: Run the sampler in the background on a host. It sends samples to a self-hosted Towertail server and starts again after a reboot.
 ---
 
 import { Steps, Tabs, TabItem, Aside } from '@astrojs/starlight/components';
 
 <Aside type="caution" title="Experimental">
-The push mode and the `service` command are experimental. For the normal SSH setup, you do not need this page.
+The push mode and the `start` command are experimental. For the normal SSH setup, you do not need this page.
 </Aside>
 
-In push mode, the sampler sends samples over HTTPS to a [self-hosted Towertail server](/docs/self-host/quick-start/). The `service` command installs push mode as a background service:
+In push mode, the sampler sends samples over HTTPS to a [self-hosted Towertail server](/docs/self-host/quick-start/). The `start` command runs push mode in the background. It needs no root access. It also sets an entry that starts the sampler again after a reboot.
 
-- On Linux, it installs a systemd unit.
-- On macOS, it installs a launchd agent or daemon.
-
-Other operating systems do not support the `service` command.
+`start` works on Linux and macOS. It does not work on Windows.
 
 ## Before you start
 
 - A Towertail server that the host can reach.
 - A sampler token for this host. Read [Tokens](/docs/self-host/tokens/#sampler-tokens).
 
-## Install the service
+## Start the sampler
 
 <Steps>
 1. Download the binary for your platform and `checksums.txt` from the [sampler releases](https://github.com/towertail/sampler/releases). The name of the binary has the platform, for example `towertail-sampler-linux-amd64`.
@@ -31,7 +28,7 @@ Other operating systems do not support the `service` command.
     shasum -a 256 -c checksums.txt --ignore-missing
     ```
 
-3. Put the binary in a permanent location, with the name `towertail-sampler`. Make it executable. The service runs the binary from the location where you run the install command.
+3. Put the binary in a permanent location, with the name `towertail-sampler`. Make it executable. The reboot entry runs the binary from the location where you run the start command.
 
     ```sh
     mv towertail-sampler-linux-amd64 towertail-sampler
@@ -39,49 +36,49 @@ Other operating systems do not support the `service` command.
     ./towertail-sampler --version
     ```
 
-4. Install the service. Use the URL of your server and your sampler token:
+4. Start the sampler. Use the URL of your server. Give the sampler token on one line of stdin, so that it does not show in the process list:
 
     ```sh
-    ./towertail-sampler service install \
+    echo tt_your_sampler_token | ./towertail-sampler start \
       --endpoint https://towertail.example.com \
-      --token tt_your_sampler_token
+      --token-file -
     ```
 </Steps>
 
-The install command writes the token to a file with mode 0600. Then it starts the service. The service sends one sample every 30 seconds by default.
+The command saves the settings and the token in the folder `~/.towertail`. The token file has mode 0600. Then the command prints `started, pid <N>`. The sampler sends one sample every 30 seconds by default.
 
-## Install options
+## Start options
 
 | Option | Default | Description |
 | --- | --- | --- |
 | `--endpoint` | (required) | The URL of the Towertail server. |
-| `--token` | (required) | The sampler token. |
+| `--token-file` | (required) | The file with the sampler token. Use `-` to read one line from stdin. |
 | `--interval` | `30s` | The time between two samples. |
-| `--system` | off | Install a system service. The default is a service for the current user. |
-| `--user` | (none) | Linux only. The user that runs a system service. |
 | `--allow-control` | off | Let the server send control messages to the sampler, for example to stop a process. |
 | `--allow-disk-scan` | off | Let the server ask the sampler for a disk scan. Read [Allow disk scans](#allow-disk-scans). |
+| `--insecure` | off | Accept a self-signed TLS certificate of the server. |
+| `--boot` | `auto` | The entry that starts the sampler after a reboot: `auto`, `linger`, `launchagent`, `cron` or `none`. |
 
-## Installed files
+## Reboot entry
 
-<Tabs>
-  <TabItem label="Linux (systemd)">
-    | Item | Per user (default) | System (`--system`) |
-    | --- | --- | --- |
-    | Unit file | `~/.config/systemd/user/towertail-sampler.service` | `/etc/systemd/system/towertail-sampler.service` |
-    | Token file | `~/.config/towertail/sampler.token` | `/etc/towertail/sampler.token` |
-    | Log | journald, unit `towertail-sampler.service` | journald, unit `towertail-sampler.service` |
-  </TabItem>
-  <TabItem label="macOS (launchd)">
-    | Item | Per user (default) | System (`--system`) |
-    | --- | --- | --- |
-    | Plist | `~/Library/LaunchAgents/com.towertail.sampler.plist` | `/Library/LaunchDaemons/com.towertail.sampler.plist` |
-    | Token file | `~/Library/Application Support/Towertail/sampler.token` | `/etc/towertail/sampler.token` |
-    | Log | `~/Library/Logs/Towertail/sampler.log` | `/var/log/towertail-sampler.log` |
-  </TabItem>
-</Tabs>
+The `--boot` option sets how the sampler starts again after a reboot. No mode needs root access.
 
-A system service writes to system folders. Run the install command with `sudo` when you use `--system`.
+| Mode | System | What it sets |
+| --- | --- | --- |
+| `linger` | Linux | A systemd user unit, and `loginctl enable-linger` for your user. |
+| `launchagent` | macOS | A LaunchAgent. It starts after you log in. |
+| `cron` | Linux and macOS | Crontab lines with `@reboot`. |
+| `auto` | Linux and macOS | `linger`, then `cron` on Linux. `launchagent`, then `cron` on macOS. |
+
+## Files
+
+| Item | Location |
+| --- | --- |
+| Settings | `~/.towertail/sampler.json` |
+| Token file | `~/.towertail/sampler.token` |
+| Log | `~/.towertail/sampler.log` |
+| Systemd unit (`linger`) | `~/.config/systemd/user/towertail-sampler.service` |
+| LaunchAgent (`launchagent`) | `~/Library/LaunchAgents/com.towertail.sampler.plist` |
 
 ## Allow disk scans
 
@@ -89,40 +86,78 @@ A disk scan sends the names and sizes of the folders of the host to the server. 
 
 <Steps>
 1. In the Mac app, open the full view of the host. Select **DISK**, then **Usage**. Click **Allow disk scans**.
-2. On the host, remove the service:
+2. On the host, stop the sampler:
 
     ```sh
-    ./towertail-sampler service uninstall
+    ./towertail-sampler stop
     ```
 
-    This command removes only a per-user service. For a system service, read [Manage the service](#manage-the-service).
-
-3. Install the service again with the same sampler token and `--allow-disk-scan`:
+3. Start the sampler again with `--allow-disk-scan`. Use the saved token file. Add each other `--allow` option that you use, because the start command does not keep them:
 
     ```sh
-    ./towertail-sampler service install \
+    ./towertail-sampler start \
       --endpoint https://towertail.example.com \
-      --token tt_your_sampler_token \
+      --token-file ~/.towertail/sampler.token \
       --allow-disk-scan
     ```
 </Steps>
 
 <Aside type="caution">
-Do not run `service install` on a service that runs. The install command does not restart the service, so the new options have no effect.
+Do not skip the `stop` command. When the sampler runs, `start` prints `already running`, and the sampler keeps the old options.
 </Aside>
 
 The scan does not change files. For more information, read [Disk scans](/docs/sampler/how-it-works/#disk-scans).
 
-## Manage the service
+## Manage the sampler
 
 | Command | Result |
 | --- | --- |
-| `towertail-sampler service status` | Shows the status of the service. |
-| `towertail-sampler service log` | Shows the log. Add `-f` to follow the log. |
-| `towertail-sampler service stop` | Stops the service. |
-| `towertail-sampler service start` | Starts the service. |
-| `towertail-sampler service uninstall` | Stops the service and removes the unit or plist and the token file. |
+| `towertail-sampler status` | Prints the state as one JSON line. The field `running` shows if the sampler runs. |
+| `towertail-sampler stop` | Stops the sampler. A `cron` entry starts it again at its next run. |
+| `towertail-sampler start` | Starts the sampler with the saved settings. |
+| `towertail-sampler boot show` | Shows the reboot entry that works. |
+| `towertail-sampler boot enable` | Sets the reboot entry. Add `--mode` to choose the mode. |
+| `towertail-sampler boot disable` | Removes the reboot entry. It does not stop the sampler. |
 
-<Aside type="caution">
-These commands do not accept `--system`. They operate on the per-user service only. For a system service, use `systemctl` or `launchctl` directly. For example: `sudo systemctl status towertail-sampler`.
-</Aside>
+To remove the sampler from the host, run `boot disable` and then `stop`.
+
+## Hosts with an old service
+
+Old versions had the command `towertail-sampler service install`. This command is removed. A host that ran it keeps a systemd unit or a LaunchAgent that runs `towertail-sampler push`. The unit or plist keeps working. To move the host to `start`, do these steps:
+
+<Steps>
+1. Stop the old service. This step is necessary, because `start` and `boot disable` do not stop it.
+
+    <Tabs>
+      <TabItem label="Linux (systemd)">
+        ```sh
+        systemctl --user disable --now towertail-sampler
+        ```
+      </TabItem>
+      <TabItem label="macOS (launchd)">
+        ```sh
+        launchctl bootout gui/$(id -u)/com.towertail.sampler
+        ```
+      </TabItem>
+    </Tabs>
+
+2. Start the sampler with `start`, as in [Start the sampler](#start-the-sampler). With `--boot linger` or `--boot launchagent`, the command writes over the old unit or plist. These files have the same names as the old ones. Use `boot disable` to remove them without a new start.
+3. Optional: remove the old token file. It is `~/.config/towertail/sampler.token` on Linux and `~/Library/Application Support/Towertail/sampler.token` on macOS.
+</Steps>
+
+A system service has the files `/etc/systemd/system/towertail-sampler.service` or `/Library/LaunchDaemons/com.towertail.sampler.plist`. The `start` command does not change them. Stop and remove them with `sudo`:
+
+<Tabs>
+  <TabItem label="Linux (systemd)">
+    ```sh
+    sudo systemctl disable --now towertail-sampler
+    sudo rm /etc/systemd/system/towertail-sampler.service
+    ```
+  </TabItem>
+  <TabItem label="macOS (launchd)">
+    ```sh
+    sudo launchctl bootout system/com.towertail.sampler
+    sudo rm /Library/LaunchDaemons/com.towertail.sampler.plist
+    ```
+  </TabItem>
+</Tabs>

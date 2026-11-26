@@ -94,7 +94,7 @@ curl -X POST https://towertail.example.com/v1/sampler/enroll \
   -d '{"display_name": "web-1"}'
 ```
 
-The response contains `node_id` and `sampler_token`. Use the sampler token with [the sampler service](/docs/sampler/service-install/).
+The response contains `node_id` and `sampler_token`. Use the sampler token with [the background sampler](/docs/sampler/service-install/).
 
 To make a sampler token for a node that exists, use the command line with `--kind=sampler --node-id=<uuid>`.
 

@@ -45,7 +45,7 @@ In push mode, the sampler sends samples over HTTPS to a [self-hosted Towertail s
     ```
 </Steps>
 
-The command saves the settings and the token in the folder `~/.towertail`. The token file has mode 0600. Then the command prints `started, pid <N>`. The sampler sends one sample every 30 seconds by default.
+The command saves the settings and the token in the folder `~/.towertail`. The token file has mode 0600. Then the command prints `started, pid <N>`. The sampler sends one sample every 30 seconds by default. A Towertail server can order another interval. The cloud orders 5 s while a page shows the host, and 30 s at other times.
 
 ## Start options
 
